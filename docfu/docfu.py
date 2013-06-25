@@ -145,15 +145,16 @@ class Docfu(object):
     another. Made for documentation generation, this class also provides global 
     template variables and processing."""
 
-    def __init__(self, uri, dest, sub_dir='docs', **kwargs):
+    def __init__(self, uri, dest, **kwargs):
         self.uri = uri_parse(uri)
         self.dest = os.path.abspath(dest)
-        self.sub_dir = sub_dir
+        self.sub_dir = kwargs.get('sub_dir', 'docs')
         self.template_globals = kwargs['template_globals'] if 'template_globals' in kwargs else {}
-
 
         self.repository_dir = git_clone(self.uri)
 
+        print(self.repository_dir)
+        print(self.sub_dir)
         self.source = os.path.join(self.repository_dir, self.sub_dir)
 
         self.branch = kwargs['branch'] if 'branch' in kwargs else None
