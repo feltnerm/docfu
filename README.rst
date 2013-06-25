@@ -2,6 +2,22 @@
 docfu
 =====
 
+    Ruler Zig Zag, Zig-Allah jam is fatal
+    
+    Quick to stick my docfu sword right through ya navel
+    
+    Suspenseful, plus bein bought through my utensil
+    
+    The pencil, I break strong winds up against your
+    
+    Abbot, that run up through your county like the Maverick
+    
+    Caps through the tablets, I gots to make the fabrics
+    
+    
+    ~ RZA "Wu-Tang: 7th Chamber"
+
+
 docfu makes generating documentation from a git repository easy. You might find it useful if you have a git repository
 and would like to generate documentation on a per-branch or -tag basis.
 
@@ -27,6 +43,14 @@ Usage:
                             
 Examples:
 ---------
+
+Using a git repository url:
+~~~~~~~~~~~~~~~~~~~~~~~
+``docfu "https://github.com/feltnerm/docfu" "/home/feltnerm/public_html/docs"```
+
+Using a short GitHub url:
+~~~~~~~~~~~~~~~~~~~~~~~~~
+``docfu "feltnerm/docfu" "/home/feltnerm/public_html/docs"```
 
 Specify a sub-directory:
 ~~~~~~~~~~~~~~~~~~~~~~~
