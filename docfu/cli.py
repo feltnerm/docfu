@@ -14,7 +14,7 @@ def parse_args(argv):
         help="A git branch to checkout.")
     argp.add_argument('-t', '--tag', 
         help="A git tag to checkout.")
-    argp.add_argument('-s', '--sub-dir', 
+    argp.add_argument('-s', '--sub-dir', default="docs", 
         help="Sub-directory which to compile from.")
     argp.add_argument('uri', nargs=1, 
         help="A URI pointing to a file path, git repository, or github shortened repo.")
