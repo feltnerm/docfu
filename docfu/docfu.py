@@ -21,7 +21,7 @@ Then you have access to the Docfu api which will allow you to:
 :license: MIT see LICENSE for more details
 """
 
-import os, os.path, shlex, shutil, subprocess, sys, tempfile, urlparse
+import os, os.path, random, shlex, shutil, subprocess, sys, tempfile, urlparse
 
 import jinja2
 import jinja2.ext
@@ -36,16 +36,21 @@ def uri_parse(u):
     """ A provided url can be one of:
         * github repo: "feltnerm/foo"
         * git path: "http://github.com/feltnerm/foo.git"
+        * filesystem path: "~/Projects/foo"
 
         This functions parses a provided URL string matching one of those 
         three categories. """
     url = urlparse.urlparse(u)
 
-    if not url.scheme and len(u.split('/')) == 2:
-        # github url
-        u = u.strip()
-        u = "http://github.com/" + u
-        url = urlparse.urlparse(u)
+    if not url.scheme:
+        if u.count('/') == 1 and len(u.split('/')) == 2:
+            # github url
+            u = u.strip()
+            u = "http://github.com/" + u
+            url = urlparse.urlparse(u)
+        else:
+            u = "file://" + os.path.expanduser(u)
+            url = urlparse.urlparse(u)
 
     return urlparse.urlunparse(url)
 
@@ -92,6 +97,15 @@ def tmp_close(path):
         if e.errno != 2:
             raise
 
+def tmp_cp(src):
+    """ Copy the source directory to a tmp directory. 
+
+    @TODO: ignore version control and other things.
+    """
+    dest = tmp_mk()
+    dest = os.path.join('/tmp', 'docfu-%s' % random.randint(999, 10000))
+    shutil.copytree(src, dest, ignore=shutil.ignore_patterns('*.git', 'node_modules'))
+    return dest
 
 class MarkdownJinja(jinja2.ext.Extension):
     """ Add markdown support to Jinja2 templates. 
@@ -151,17 +165,22 @@ class Docfu(object):
         self.sub_dir = kwargs.get('sub_dir', 'docs')
         self.template_globals = kwargs['template_globals'] if 'template_globals' in kwargs else {}
 
-        self.repository_dir = git_clone(self.uri)
+        if self.uri.startswith('file://'):
+            self.uri = self.uri.replace("file://", "")
+            self.repository_dir = tmp_cp(self.uri)
+            self.git_repo = False
+        else:
+            self.repository_dir = git_clone(self.uri)
+            self.git_repo = True 
 
-        print(self.repository_dir)
-        print(self.sub_dir)
         self.source = os.path.join(self.repository_dir, self.sub_dir)
+        print("> Source: %s" % self.source)
 
         self.branch = kwargs['branch'] if 'branch' in kwargs else None
         self.tag = kwargs['tag'] if 'tag' in kwargs else None
-        if self.branch:
+        if self.branch and self.git_repo:
             git_checkout(self.repository_dir, branch=self.branch)
-        elif self.tag:
+        elif self.tag and self.git_repo:
             git_checkout(self.repository_dir, tag=self.tag)
 
         self.template_globals['BRANCH'] = self.branch
@@ -193,9 +212,9 @@ class Docfu(object):
         tmp_close(self.repository_dir)
 
     def __call__(self):
-        self.render_docs()
+        self.render()
 
-    def render_docs(self):
+    def render(self):
         """ Render the docs found in the repository's sub-dir into the 
         destination dir. """
         print("\n\n### Rendering templates ###\n\n")
