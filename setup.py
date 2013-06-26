@@ -9,7 +9,7 @@ except ImportError:
 settings = {}
 settings.update(
     name="docfu",
-    version='0.2',
+    version='0.3',
     author='Mark Feltner',
     author_email='feltner.mj@gmail.com',
     license="MIT",
