@@ -63,8 +63,8 @@ def git_clone(git_url):
     this class so it can be closed. """
 
     path = tmp_mk()
-    git_clone_cmd = 'git clone %s %s' % (git_url, path)
-    retcode = subprocess.check_call(shlex.split(git_clone_cmd))
+    git_clone_cmd = shlex.split('git clone %s %s' % (str(git_url), str(path)))
+    retcode = subprocess.check_call(git_clone_cmd)
     return path 
 
 
@@ -72,12 +72,12 @@ def git_checkout(git_repo_path, branch=None, tag=None):
     """ Checkout the code at git_repo_path. Ref is the specific branch or 
     tag to use. """
     if branch:
-        git_checkout_cmd = shlex.split('git checkout %s' % branch)
+        git_checkout_cmd = shlex.split('git checkout %s' % str(branch))
 
     if tag:
-        git_checkout_cmd = shlex.split('git checkout -b %s' % tag)
+        git_checkout_cmd = shlex.split('git checkout -b %s' % str(tag))
 
-    stdout, stderr = subprocess.Popen(git_checkout_cmd, cwd="%s" % git_repo_path).communicate()
+    stdout, stderr = subprocess.Popen(git_checkout_cmd, cwd="%s" % str(git_repo_path)).communicate()
 
 #
 # Temporary File / Directory Utilities
