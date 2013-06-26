@@ -2,24 +2,38 @@
 docfu
 =====
 
-    Ruler Zig Zag, Zig-Allah jam is fatal
+    *Shaolin shadowboxing, and the docfu sword style*
     
-    Quick to stick my docfu sword right through ya navel
+    *If what you say is true, the Shaolin and the docfu could be dangerous.*
     
-    Suspenseful, plus bein bought through my utensil
-    
-    The pencil, I break strong winds up against your
-    
-    Abbot, that run up through your county like the Maverick
-    
-    Caps through the tablets, I gots to make the fabrics
-    
-    
-    ~ RZA "Wu-Tang: 7th Chamber"
+    *Do you think your docfu sword can defeat me?*
+
+    *En garde, I'll let you try my docfu style.*
 
 
-docfu makes generating documentation from a git repository easy. You might find it useful if you have a git repository
-and would like to generate documentation on a per-branch or -tag basis.
+docfu will split your docs like a razor. If that razor could let you write documentation in markdown, AND Jinja, AND html.
+Basically, it'll treat a folder as Jinaj2 templates (with extensions!) and deep copy it while converting each "template"
+to valid HTML. That means you get the decreased verbosity of Markdown and the extensibility of a *real* templating engine.
+
+Another cool feature is that docfu will automatically clone the branch or tag of the repository you give it. This makes it
+a great tool for a git post-commit hook or as just a regular ol' documentation generator.
+
+docfu is at most alpha status right now. Please post ideas and bugs to the `issue tracker`_.
+
+.. _issue tracker: https://github.com/feltnerm/docfu/issues
+
+Contributions are welcome as well!
+
+Installation:
+-------------
+
+    *DUH-DUH-DUH...enter the docfu zone ...*
+
+::
+
+    % git clone https://github.com/feltnerm/docfu
+    % cd docfu
+    % python setup.py install
 
 Usage: 
 ------
@@ -63,3 +77,5 @@ Docfu a specific tag
 Docfu a specific branch
 ~~~~~~~~~~~~~~~~~~~~~~~
 ``docfu  --branch "develop" --sub-dir "docs/src" "feltnerm/docfu" "/home/feltnerm/public_html/docs"``
+
+*From the slums of Shaolin, Wu-Tang Clan strikes again*
