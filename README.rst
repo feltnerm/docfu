@@ -2,13 +2,10 @@
 docfu
 =====
 
-    *Shaolin shadowboxing, and the docfu sword style*
-    
-    *If what you say is true, the Shaolin and the docfu could be dangerous.*
-    
-    *Do you think your docfu sword can defeat me?*
-
-    *En garde, I'll let you try my docfu style.*
+    | Shaolin shadowboxing, and the docfu sword style
+    | If what you say is true, the Shaolin and the docfu could be dangerous.*
+    | Do you think your docfu sword can defeat me?*
+    | En garde, I'll let you try my docfu style.*
 
 
 docfu will split your docs like a razor. If that razor could let you write documentation in markdown, AND Jinja, AND html.
@@ -38,6 +35,11 @@ Installation:
 Usage: 
 ------
 
+   | The game of chess is like a swordfight
+   | You must think first before you move
+   | Toad style is immensely strong and immune to nearly any weapon
+   | When it's properly used it's almost invincible
+
 ::
 
     docfu [-h] [-b BRANCH] [-t TAG] [-s SUB_DIR] uri destination
@@ -57,6 +59,9 @@ Usage:
                             
 Examples:
 ---------
+
+   | Straight from the slums of Shaolin
+   | docfu Killa B'z on a swarm
 
 Using a git repository url:
 ~~~~~~~~~~~~~~~~~~~~~~~
