@@ -28,6 +28,12 @@ import jinja2.ext
 
 import markdown2 as md 
 
+import logging
+
+logging.basicConfig()
+logger = logging.getLogger('docfu')
+logger.setLevel(logging.INFO)
+
 #
 # Utils
 #
@@ -174,7 +180,7 @@ class Docfu(object):
             self.git_repo = True 
 
         self.source = os.path.join(self.repository_dir, self.sub_dir)
-        print("> Source: %s" % self.source)
+        logger.info("> Source: %s" % self.source)
 
         self.branch = kwargs['branch'] if 'branch' in kwargs else None
         self.tag = kwargs['tag'] if 'tag' in kwargs else None
@@ -208,7 +214,7 @@ class Docfu(object):
         return self
 
     def __exit__(self, type, value, traceback):
-        print("> Cleaning up ...")
+        logger.info("> Cleaning up ...")
         tmp_close(self.repository_dir)
 
     def __call__(self):
@@ -217,11 +223,11 @@ class Docfu(object):
     def render(self):
         """ Render the docs found in the repository's sub-dir into the 
         destination dir. """
-        print("\n\n### Rendering templates ###\n\n")
+        logger.info("\n\n### Rendering templates ###\n\n")
         for template_name in self._env.list_templates():
             self._render(template_name)
-        print("\n\n### Templates rendered ###\n\n")
-        print("%s" % self.dest)
+        logger.info("\n\n### Templates rendered ###\n\n")
+        logger.info("%s" % self.dest)
 
     def _render(self, template_name): 
         """ Render a single file. """
@@ -230,7 +236,7 @@ class Docfu(object):
             template.filename.replace(self.source+"/", ""))
 
         html = template.render(self.template_globals)
-        print("> Rendering template: %s" % template_name)
+        logger.info("> Rendering template: %s" % template_name)
         template_dest_dir = os.path.dirname(template_dest)
         if not os.path.exists(template_dest_dir):
             os.makedirs(os.path.dirname(template_dest))
@@ -239,4 +245,4 @@ class Docfu(object):
         template_dest = os.path.splitext(template_dest)[0] + '.html'
         with open(template_dest, 'wb') as output:
             output.write(html.encode('utf-8'))
-        print("\tRendered: %s" % template_dest)
+        logger.info("\tRendered: %s" % template_dest)
