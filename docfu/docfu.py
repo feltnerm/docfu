@@ -25,14 +25,19 @@ import os, os.path, random, shlex, shutil, subprocess, sys, tempfile, urlparse
 
 import jinja2
 import jinja2.ext
+from pprint import pprint
 
 import markdown2 as md 
+
+from webassets import Environment as AssetsEnvironment
+from webassets import Bundle
+from webassets.ext.jinja2 import AssetsExtension
 
 import logging
 
 logging.basicConfig()
 logger = logging.getLogger('docfu')
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 #
 # Utils
@@ -71,6 +76,7 @@ def git_clone(git_url):
     path = tmp_mk()
     git_clone_cmd = shlex.split('git clone %s %s' % (str(git_url), str(path)))
     retcode = subprocess.check_call(git_clone_cmd)
+    logger.debug("Cloned repository. \n %s" % git_clone_cmd)
     return path 
 
 
@@ -84,6 +90,7 @@ def git_checkout(git_repo_path, branch=None, tag=None):
         git_checkout_cmd = shlex.split('git checkout -b %s' % str(tag))
 
     stdout, stderr = subprocess.Popen(git_checkout_cmd, cwd="%s" % str(git_repo_path)).communicate()
+    logger.debug("Checked out source repository. \n %s" % git_checkout_cmd)
 
 #
 # Temporary File / Directory Utilities
@@ -92,15 +99,19 @@ def git_checkout(git_repo_path, branch=None, tag=None):
 def tmp_mk():
     """ Make a temporary directory, already prefixed with `docfu-`, 
     in `/tmp/`."""
-    return tempfile.mkdtemp(prefix='docfu-', dir='/tmp')
+    path = tempfile.mkdtemp(prefix='docfu-', dir='/tmp')
+    logger.debug("Temporary path created at: %s" % path)
+    return path
 
 
 def tmp_close(path):
     """ Remove the directory denoted by `path`. """
     try:
         shutil.rmtree(path)
+        logger.debug("Temporary path removed at: %s" % path)
     except Exception, e:
         if e.errno != 2:
+            logger.error("Cannot remove temporary path %s. Error %s" % (path, e))
             raise
 
 def tmp_cp(src):
@@ -111,6 +122,7 @@ def tmp_cp(src):
     dest = tmp_mk()
     dest = os.path.join('/tmp', 'docfu-%s' % random.randint(999, 10000))
     shutil.copytree(src, dest, ignore=shutil.ignore_patterns('*.git', 'node_modules'))
+    logger.debug("Copied source files %s to tempdir %s" % (src, dest))
     return dest
 
 class MarkdownJinja(jinja2.ext.Extension):
@@ -168,7 +180,9 @@ class Docfu(object):
     def __init__(self, uri, dest, **kwargs):
         self.uri = uri_parse(uri)
         self.dest = os.path.abspath(dest)
-        self.sub_dir = kwargs.get('sub_dir', 'docs')
+        self.source_dir = kwargs.get('source_dir')
+        self.templates_dir = kwargs.get('templates_dir')
+        self.assets_dir = kwargs.get('assets_dir')
         self.template_globals = kwargs['template_globals'] if 'template_globals' in kwargs else {}
 
         if self.uri.startswith('file://'):
@@ -179,7 +193,7 @@ class Docfu(object):
             self.repository_dir = git_clone(self.uri)
             self.git_repo = True 
 
-        self.source = os.path.join(self.repository_dir, self.sub_dir)
+        self.source = os.path.join(self.repository_dir, self.source_dir)
         logger.info("> Source: %s" % self.source)
 
         self.branch = kwargs['branch'] if 'branch' in kwargs else None
@@ -193,6 +207,7 @@ class Docfu(object):
         self.template_globals['TAG'] = self.tag
 
         path = self.dest
+        d = self.dest
         if self.branch:
             path = os.path.join(self.dest, 'branches', 
                 self.branch.replace("/", "_"))
@@ -201,48 +216,84 @@ class Docfu(object):
             path = os.path.join(self.dest, 'tags', self.tag)
 
         self.dest = path
+        self.template_globals['ASSETS'] = os.path.join(self.dest, 'assets').replace(d, "")
 
         if os.path.exists(self.dest):
             shutil.rmtree(self.dest)
         os.makedirs(self.dest)
 
-        self._env = jinja2.Environment(extensions=[MarkdownJinja],
-            loader=jinja2.FileSystemLoader(
-                os.path.join(self.repository_dir, self.sub_dir)))
+        if os.path.exists(os.path.join(self.dest, 'assets')):
+            shutil.rmtree(os.path.join(self.dest, 'assets'))
+        shutil.copytree(
+                os.path.join(self.repository_dir, self.assets_dir),
+                os.path.join(self.dest, 'assets'))
+
+        #self._assets_env = AssetsEnvironment(
+        #        load_path=os.path.join(self.repository_dir, self.assets_dir), 
+        #        directory=os.path.join(self.dest, 'assets'),
+        #        url='assets'
+        #)
+
+        self._env = jinja2.Environment(
+                extensions=[MarkdownJinja],
+                loader=jinja2.FileSystemLoader(
+                    os.path.join(self.repository_dir, self.templates_dir)
+                )
+        )
+
+        self.source_files = set()
+
+        for current, dirs, files in os.walk(os.path.join(self.repository_dir, self.source_dir)):
+            for f in files:
+                self.source_files.add(os.path.join(current, f))
+
+        #self._setup_bundles()
+
+    def _setup_bundles(self):
+        pass
+        #self._assets_env.register('js_all', 'js/vendor/jquery-1.9.1.min.js', 'js/vendor/bootstrap.min.js', 'js/main.js')
+        #self._assets_env.register('css_all', 'css/bootstrap.min.css', 'css/bootstrap-responsive.min.css', 'css/main.css')
 
     def __enter__(self):
         return self
 
     def __exit__(self, type, value, traceback):
         logger.info("> Cleaning up ...")
-        tmp_close(self.repository_dir)
+        #tmp_close(self.repository_dir)
 
     def __call__(self):
         self.render()
 
     def render(self):
-        """ Render the docs found in the repository's sub-dir into the 
+        """ Render the docs found in the repository's source-dir into the 
         destination dir. """
-        logger.info("\n\n### Rendering templates ###\n\n")
-        for template_name in self._env.list_templates():
-            self._render(template_name)
-        logger.info("\n\n### Templates rendered ###\n\n")
-        logger.info("%s" % self.dest)
+        logger.info("\n### Rendering documents ###\n")
+        for source_path in self.source_files:
+            source_file = open(source_path, 'r')
+            source_data = source_file.read().decode('utf-8', 'replace') 
+            source_dest = source_path.replace(os.path.join(self.repository_dir, self.source_dir), "")
+            source_dest = os.path.join(self.dest, "html") + source_dest
+            source_name = os.path.basename(source_dest)
+            self._render(source_name, source_data, source_dest)
+            source_file.close()
 
-    def _render(self, template_name): 
+        logger.info("\n### Documents rendered ###\n\n")
+        logger.debug("%s" % self.dest)
+
+    def _render(self, name, data, dest): 
         """ Render a single file. """
-        template = self._env.get_template(template_name)
-        template_dest = os.path.join(self.dest, 
-            template.filename.replace(self.source+"/", ""))
+        logger.info("\t> Rendering document: %s" % name)
+        logger.debug("\t\t %s @ %s " % (name, dest))
 
-        html = template.render(self.template_globals)
-        logger.info("> Rendering template: %s" % template_name)
-        template_dest_dir = os.path.dirname(template_dest)
-        if not os.path.exists(template_dest_dir):
-            os.makedirs(os.path.dirname(template_dest))
+        base_template = "base.html"
+        template = self._env.get_template(base_template)
+        html = template.render(content=data, **self.template_globals)
+        dest_dir = os.path.dirname(dest)
+        if not os.path.exists(dest_dir):
+            os.makedirs(dest_dir)
         
-        # make extension .htmkl
-        template_dest = os.path.splitext(template_dest)[0] + '.html'
-        with open(template_dest, 'wb') as output:
+        # make extension .html
+        dest = os.path.splitext(dest)[0] + '.html'
+        with open(dest, 'wb') as output:
             output.write(html.encode('utf-8'))
-        logger.info("\tRendered: %s" % template_dest)
+        logger.info("\t Rendered: %s" % dest)

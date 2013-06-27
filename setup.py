@@ -25,7 +25,8 @@ settings.update(
         "Pygments>=1.6",
         "argparse>=1.2.1",
         "markdown2>=2.1.0",
-        "smartypants>=1.6.0.3"        
+        "smartypants>=1.6.0.3",
+        "webassets"
     ],
     classifiers=(
         'Environment :: Console',
