@@ -22,11 +22,11 @@ settings.update(
     long_description=open('README.rst').read(),
     install_requires=[
         "Jinja2>=2.7",
+        "Markdown==2.3.1",
         "Pygments>=1.6",
         "argparse>=1.2.1",
-        "markdown2>=2.1.0",
         "smartypants>=1.6.0.3",
-        "webassets"
+        "mdx-smartypants==1.3"
     ],
     classifiers=(
         'Environment :: Console',
