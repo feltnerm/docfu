@@ -9,24 +9,21 @@ except ImportError:
 settings = {}
 settings.update(
     name="docfu",
-    version='0.3',
+    version='0.4',
     author='Mark Feltner',
     author_email='feltner.mj@gmail.com',
     license="MIT",
     url="https://github.com/feltnerm/docfu",
     packages=['docfu',],
-    data_files=[
-        'README.rst',
-    ],
     description="Generate static docs from a git repo.",
-    long_description=open('README.rst').read(),
+    long_description=open('README').read(),
     install_requires=[
         "Jinja2>=2.7",
+        "Markdown==2.3.1",
         "Pygments>=1.6",
         "argparse>=1.2.1",
-        "markdown2>=2.1.0",
         "smartypants>=1.6.0.3",
-        "webassets"
+        "mdx-smartypants==1.3"
     ],
     classifiers=(
         'Environment :: Console',
