@@ -25,8 +25,9 @@ Then you have access to the Docfu api which will allow you to:
 import logging, os.path, shutil
 
 import jinja2
+import markdown
 
-from ext import MarkdownJinja
+from ext import render_markdown, MarkdownJinja
 from util import (git_clone, git_checkout, tmp_mk, tmp_close, tmp_cp, 
         walk_files, uri_parse)
 
@@ -48,7 +49,7 @@ class Docfu(object):
 
         if self.uri.startswith('file://'):
             self.uri = self.uri.replace("file://", "")
-            self.repository_dir = tmp_cp(self.uri)
+            self.repository_dir = tmp_cp(os.path.expanduser(self.uri))
             self.git_repo = False
         else:
             self.repository_dir = git_clone(self.uri)
@@ -71,9 +72,12 @@ class Docfu(object):
         elif tag and self.git_repo:
             self.git_ref_type = 'tag'
             self.git_ref_val = tag
-            git_checkout(self.repository_dir, tag=self.tag)
+        else:
+            self.git_ref_type = 'file'
+            self.git_ref_val = os.path.basename(self.uri)
 
-        git_checkout(self.repository_dir, self.git_ref_type, self.git_ref_val)
+        if self.git_repo:
+            git_checkout(self.repository_dir, self.git_ref_type, self.git_ref_val)
 
         if "/" in self.git_ref_val:
             self.git_ref_val = self.git_ref_val.replace("/", "_")
@@ -148,7 +152,7 @@ class Docfu(object):
         return {
                 'GIT_REF_TYPE': self.git_ref_type,
                 'GIT_REF': self.git_ref_val,
-                'ASSETS': self.assets_dest_dir
+                'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, 'assets') 
                 }
 
     def _init_template_engine(self, **options):
@@ -181,7 +185,8 @@ class Docfu(object):
         """ Render a single file. """
         logger.info("\t> Rendering document: %s --> %s" % (name, dest))
         template = self._env.get_template(self.base_template)
-        html = template.render(content=content, **self.template_globals)
+        md_html = render_markdown(content) 
+        html = template.render(content=md_html, **self.template_globals)
         dest_dir = os.path.dirname(dest)
         if not os.path.exists(dest_dir):
             os.makedirs(dest_dir)

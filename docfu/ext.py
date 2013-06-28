@@ -1,7 +1,11 @@
 import jinja2
 import jinja2.ext
 
-import markdown2 as md 
+import markdown as md 
+
+render_markdown = lambda text: md.markdown(text, ['extra', 'tables', 
+    'codehilite(force_linenos=True)', 'headerid', 'nl2br', 'sane_lists', 
+    'wikilinks', 'smartypants'])
 
 class MarkdownJinja(jinja2.ext.Extension):
     """ Add markdown support to Jinja2 templates. 
@@ -28,9 +32,16 @@ class MarkdownJinja(jinja2.ext.Extension):
         super(MarkdownJinja, self).__init__(environment)
         environment.extend(
             markdowner=md.Markdown(
-                extras=['wiki-tables', 'cuddled-lists', 'fenced-code-blocks', 
-                    'header-ids', 'smarty-pants',])
-        )   
+                extras=[
+                    'extra',
+                    'tables', 
+                    'codehilite(force_linenos=True)',
+                    'headerid',
+                    'nl2br',
+                    'sane_lists',
+                    'wikilinks'
+                    'smartypants',
+                ]))   
 
     def parse(self, parser):
         lineno = parser.stream.next().lineno
