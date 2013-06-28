@@ -55,7 +55,6 @@ class Docfu(object):
             self.repository_dir = git_clone(self.uri)
             self.git_repo = True 
 
-        source_src_dir = kwargs['source_dir'] if 'source_dir' in kwargs else join(self.root, 'src')
         source_src_dir = kwargs['source_dir'] if 'source_dir' in kwargs else os.path.join(self.root, 'src')
         assets_src_dir = kwargs['assets_dir'] if 'assets_dir' in kwargs else os.path.join(self.root, 'assets')
         templates_src_dir = kwargs['templates_dir'] if 'templates_dir' in kwargs else os.path.join(self.root, 'templates')
