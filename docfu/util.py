@@ -126,8 +126,8 @@ def list_refs(path):
             },
     }
     """
+    result = {}
     if os.path.isdir(path):
-        result = {}
         logger.debug("Listing refs for root path: %s" % path)
         ref_types = [(x, os.path.basename(x)) for x in glob.glob(os.path.join(path, '*'))]
 
@@ -141,6 +141,29 @@ def list_refs(path):
                 result[ref_type]['refs'].append({ 'ref_val': ref_value, 'path': y })
 
     return result
-    
-    
+
+def list_doc_tree(path):
+    """ Returns a 'tree-like' structure for navigation. """
+    result = {}
+    if os.path.isdir(path):
+        result = { "categories": {}, "root_pages": [] }
+        logger.debug("Generating doc tree for path: %s" % path)
+
+        for x in os.listdir(path):
+            if os.path.isdir(os.path.join(path, x)):
+                pages = os.listdir(os.path.join(path, x))
+                for page in pages:
+                    base = os.path.splitext(page)[0]
+                    if not base.startswith('.') and not base == 'index':
+                        if x in result['categories']:
+                            result['categories'][x].append(base)
+                        else:
+                            result['categories'][x] = [base]
+            else:
+                base = os.path.splitext(x)[0]
+                if not base.startswith(".") and not base == 'index':
+                    result['root_pages'].append(base)
+
+        return result
+
 

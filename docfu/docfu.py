@@ -28,7 +28,7 @@ import jinja2
 import markdown
 
 from ext import render_markdown, MarkdownJinja
-from util import (git_clone, git_checkout, list_refs, tmp_mk, tmp_close, tmp_cp, 
+from util import (git_clone, git_checkout, list_doc_tree, list_refs, tmp_mk, tmp_close, tmp_cp, 
         walk_files, uri_parse)
 
 logger = logging.getLogger('docfu')
@@ -153,7 +153,8 @@ class Docfu(object):
                 'GIT_REF_TYPE': self.git_ref_type,
                 'GIT_REF': self.git_ref_val,
                 'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, 'assets'), 
-                'ALL_GIT_REFS': list_refs(self.dest_root)
+                'ALL_GIT_REFS': list_refs(self.dest_root),
+                'DOC_TREE': list_doc_tree(self.source_dest_dir)
                 }
 
     def _init_template_engine(self, **options):
@@ -192,7 +193,8 @@ class Docfu(object):
         dest_dir = os.path.dirname(dest)
         if not os.path.exists(dest_dir):
             os.makedirs(dest_dir)
-        
+
+        self.template_globals = self._init_template_globals()
         # make extension .html
         dest = os.path.splitext(dest)[0] + '.html'
         with open(dest, 'wb') as output:
