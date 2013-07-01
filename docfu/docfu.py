@@ -28,7 +28,7 @@ import jinja2
 import markdown
 
 from ext import render_markdown, MarkdownJinja
-from util import (git_clone, git_checkout, tmp_mk, tmp_close, tmp_cp, 
+from util import (git_clone, git_checkout, list_refs, tmp_mk, tmp_close, tmp_cp, 
         walk_files, uri_parse)
 
 logger = logging.getLogger('docfu')
@@ -151,7 +151,8 @@ class Docfu(object):
         return {
                 'GIT_REF_TYPE': self.git_ref_type,
                 'GIT_REF': self.git_ref_val,
-                'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, 'assets') 
+                'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, 'assets'), 
+                'ALL_GIT_REFS': list_refs(self.source_dest_dir)
                 }
 
     def _init_template_engine(self, **options):

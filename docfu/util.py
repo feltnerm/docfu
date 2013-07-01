@@ -1,3 +1,4 @@
+import glob
 import os
 import os.path
 import random
@@ -107,4 +108,39 @@ def walk_files(path):
             paths.add(os.path.join(current, f))
             logger.debug("Source file found: %s" % os.path.join(current, f))
     return paths
+
+def list_refs(path):
+    """ Return the list of branches/tags found in the root `path`. 
+    We assume the folder structure is like so:
+        `<root>[/<ref_type>[/<ref_name>]]`
+    {
+        <ref_type> : 
+            {
+                <path>: '',
+                <refs>: [
+                    {
+                        <ref_val>: '',
+                        <path>: ''
+                    },
+                ],
+            },
+    }
+    """
+    if os.path.isdir(path):
+        result = {}
+        logger.debug("Listing refs for root path: %s" % path)
+        ref_types = [(x, os.path.basename(x)) for x in glob.glob(os.path.join(path, '*'))]
+
+        for x in glob.glob(os.path.join(path, '*')):
+            ref_type = os.path.basename(x)
+            result[ref_type] = {}
+            result[ref_type]['path'] = x
+            result[ref_type]['refs'] = []
+            for y in glob.glob(os.path.join(x, '*')):
+                ref_value = os.path.basename(y)
+                result[ref_type]['refs'].append({ 'ref_val': ref_value, 'path': y })
+
+    return result
+    
+    
 
