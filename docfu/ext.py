@@ -3,9 +3,15 @@ import jinja2.ext
 
 import markdown as md 
 
-render_markdown = lambda text: md.markdown(text, ['extra', 'tables', 
-    'codehilite(force_linenos=True)', 'headerid', 'nl2br', 'sane_lists', 
-    'wikilinks', 'smartypants'])
+markd = md.Markdown(extensions=[
+    'extra', 'tables', 'codehilite', 'headerid', 'nl2br', 'sane_lists', 
+    'wikilinks', 'smartypants'],
+    output_format='html5')
+
+render_markdown = lambda text: markd.convert(text)
+
+def markup(text, *args, **kwargs):
+    return render_markdown(text)
 
 class MarkdownJinja(jinja2.ext.Extension):
     """ Add markdown support to Jinja2 templates. 
@@ -30,18 +36,8 @@ class MarkdownJinja(jinja2.ext.Extension):
 
     def __init__(self, environment):
         super(MarkdownJinja, self).__init__(environment)
-        environment.extend(
-            markdowner=md.Markdown(
-                extras=[
-                    'extra',
-                    'tables', 
-                    'codehilite(force_linenos=True)',
-                    'headerid',
-                    'nl2br',
-                    'sane_lists',
-                    'wikilinks'
-                    'smartypants',
-                ]))   
+        environment.extend(markdowner=markd)   
+        environment.filters['markdown'] = markup
 
     def parse(self, parser):
         lineno = parser.stream.next().lineno
@@ -58,6 +54,4 @@ class MarkdownJinja(jinja2.ext.Extension):
 
     def _markdown_support(self, caller):
         return self.environment.markdowner.convert(caller()).strip()
-
-
 

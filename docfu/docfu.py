@@ -81,6 +81,7 @@ class Docfu(object):
         if "/" in self.git_ref_val:
             self.git_ref_val = self.git_ref_val.replace("/", "_")
 
+        self.dest_root = dest
         self.dest = os.path.join(dest, self.git_ref_type, self.git_ref_val)
         self.source_dest_dir = os.path.join(self.dest, 'html')
         self.assets_dest_dir = os.path.join(self.dest, 'assets')
@@ -152,7 +153,7 @@ class Docfu(object):
                 'GIT_REF_TYPE': self.git_ref_type,
                 'GIT_REF': self.git_ref_val,
                 'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, 'assets'), 
-                'ALL_GIT_REFS': list_refs(self.source_dest_dir)
+                'ALL_GIT_REFS': list_refs(self.dest_root)
                 }
 
     def _init_template_engine(self, **options):
@@ -185,7 +186,8 @@ class Docfu(object):
         """ Render a single file. """
         logger.info("\t> Rendering document: %s --> %s" % (name, dest))
         template = self._env.get_template(self.base_template)
-        md_html = render_markdown(content) 
+        md_html = content
+        #md_html = render_markdown(content) 
         html = template.render(content=md_html, **self.template_globals)
         dest_dir = os.path.dirname(dest)
         if not os.path.exists(dest_dir):
