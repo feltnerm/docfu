@@ -31,18 +31,23 @@ def parse_args(argv):
             help="A configuration file to read (not implemented)")
     argp.add_argument("-v", "--verbose", action='store_true', default=False,
             help="Run verbosely or not.")
+    argp.add_argument("-d", "--debug", action='store_true', default=False,
+            help="Run debugly or not.")
 
     options = argp.parse_args(argv)
 
     return vars(options)
 
-def init_logger(verbose):
-    logging.basicConfig()
+def init_logger(verbose, debug):
+    logging.basicConfig(format="%(levelname)s: %(msg)s")
     logger = logging.getLogger('docfu')
-    if verbose:
+
+    if debug:
         logger.setLevel(logging.DEBUG)
-    else:
+    elif verbose:
         logger.setLevel(logging.INFO)
+    else:
+        logger.setLevel(logging.ERROR)
 
 def main(argv=None):
     """ Main """
@@ -58,7 +63,7 @@ def main(argv=None):
     del options['destination']
     del options['root_dir']
 
-    init_logger(options.get('verbose', False))
+    init_logger(options.get('verbose', False), options.get('debug', False))
     with Docfu(uri, root, dest, **options) as df:
         df()
 
