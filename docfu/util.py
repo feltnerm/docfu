@@ -94,7 +94,9 @@ def get_git_branch(git_repo_path):
 def tmp_mk():
     """ Make a temporary directory, already prefixed with `docfu-`, 
     in `/tmp/`."""
-    path = tempfile.mkdtemp(prefix='docfu-', dir='/tmp')
+    if not os.path.isdir(os.path.expanduser("~/tmp")):
+        os.makedirs(os.path.expanduser("~/tmp"))
+    path = tempfile.mkdtemp(prefix='docfu-', dir=os.path.expanduser('~/tmp'))
     logger.debug("Temporary path created at: %s" % path)
     return path
 
@@ -115,7 +117,7 @@ def tmp_cp(src):
     @TODO: ignore version control and other things.
     """
     dest = tmp_mk()
-    dest = os.path.join('/tmp', 'docfu-%s' % random.randint(999, 10000))
+    dest = os.path.join(os.path.expanduser("~"), 'tmp', 'docfu-%s' % random.randint(999, 10000))
     shutil.copytree(src, dest, ignore=shutil.ignore_patterns('*.git', 'node_modules'))
     logger.debug("Copied source files %s to tempdir %s" % (src, dest))
     return dest
