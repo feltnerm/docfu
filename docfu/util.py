@@ -84,7 +84,7 @@ def get_git_branch(git_repo_path):
     out, err = p.communicate()
     if out and not err:
         logger.debug("Branch: %s" % out)
-        return branch
+        return out 
     logger.error("%s" % err)
     return '' 
 #
