@@ -29,7 +29,7 @@ import markdown
 
 from ext import render_markdown, MarkdownJinja
 from util import (git_clone, git_checkout, list_doc_tree, list_refs, tmp_mk, tmp_close, tmp_cp, 
-        walk_files, uri_parse)
+        walk_files, uri_parse, get_git_tag, get_git_branch)
 
 logger = logging.getLogger('docfu')
 
@@ -150,12 +150,15 @@ class Docfu(object):
         """ Return a dictionary of template globals to use in the
         templates. """
         return {
+                'URL_ROOT': "/"+self.git_ref_type+"/"+self.git_ref_val+"/html",
                 'GIT_REF_TYPE': self.git_ref_type,
                 'GIT_REF': self.git_ref_val,
                 'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, 'assets'), 
                 'ALL_GIT_REFS': list_refs(self.dest_root),
-                'DOC_TREE': list_doc_tree(self.source_dest_dir)
-                }
+                'DOC_TREE': list_doc_tree(self.source_src_dir),
+                'TAG': get_git_tag(self.repository_dir),
+                'BRANCH': get_git_branch(self.repository_dir)
+        }
 
     def _init_template_engine(self, **options):
         """ Return a jinja2 Environment. """

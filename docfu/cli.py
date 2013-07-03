@@ -28,7 +28,7 @@ def parse_args(argv):
     argp.add_argument('destination', nargs=1, 
         help="Destination for compiled source.")
     argp.add_argument("-c", "--config", 
-            help="A configuration file to read (not implemented)")
+            help="An [optional] configuration file to read.")
     argp.add_argument("-v", "--verbose", action='store_true', default=False,
             help="Run verbosely or not.")
     argp.add_argument("-d", "--debug", action='store_true', default=False,

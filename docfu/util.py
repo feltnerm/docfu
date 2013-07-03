@@ -66,6 +66,27 @@ def git_checkout(git_repo_path, ref_type, ref_val):
     output = subprocess.Popen(git_checkout_cmd, cwd="%s" % str(git_repo_path)).communicate()
     logger.info(output)
 
+def get_git_tag(git_repo_path):
+    cmd = shlex.split("git describe --tags $(git rev-list --tags --max-count=1)")
+    logger.debug("Getting git tag: %s" % cmd)
+    p = subprocess.Popen(cmd, cwd="%s" % str(git_repo_path), stdout=subprocess.PIPE)
+    out, err = p.communicate()
+    if out and not err:
+        logger.debug("Tag: %s" % out)
+        return out 
+    logger.error("%s" % err)
+    return ''
+
+def get_git_branch(git_repo_path):
+    cmd = shlex.split("git rev-parse --abbrev-ref HEAD")
+    logger.debug("Getting git branch: %s" % cmd)
+    p = subprocess.Popen(cmd, cwd="%s" % str(git_repo_path), stdout=subprocess.PIPE)
+    out, err = p.communicate()
+    if out and not err:
+        logger.debug("Branch: %s" % out)
+        return branch
+    logger.error("%s" % err)
+    return '' 
 #
 # Temporary File / Directory Utilities
 #
@@ -142,28 +163,50 @@ def list_refs(path):
 
     return result
 
-def list_doc_tree(path):
+def list_doc_tree(root_path):
     """ Returns a 'tree-like' structure for navigation. """
-    result = {}
-    if os.path.isdir(path):
-        result = { "categories": {}, "root_pages": [] }
-        logger.debug("Generating doc tree for path: %s" % path)
+    # (name, relpath, sub)
+    doctree = []
 
-        for x in os.listdir(path):
-            if os.path.isdir(os.path.join(path, x)):
-                pages = os.listdir(os.path.join(path, x))
-                for page in pages:
-                    base = os.path.splitext(page)[0]
-                    if not base.startswith('.') and not base == 'index':
-                        if x in result['categories']:
-                            result['categories'][x].append(base)
-                        else:
-                            result['categories'][x] = [base]
-            else:
-                base = os.path.splitext(x)[0]
-                if not base.startswith(".") and not base == 'index':
-                    result['root_pages'].append(base)
+    def recurse_doc_tree(item_path):
+        result = []
+        item_sub_dirs = []
+        item_sub_files = []
+        item_name = os.path.basename(item_path)
+        item_dir = os.path.dirname(item_path)
+        if os.path.isdir(item_path):
+            for name in os.listdir(item_path):
+                if not name.startswith(".") and name != 'index.html':
+                    if os.path.isdir(os.path.join(item_path, name)):
+                            item_sub_dirs.append(recurse_doc_tree(os.path.join(item_path, name)))
 
+                    elif os.path.isfile(os.path.join(item_path, name)):
+                        item_sub_files.append({ 'name': os.path.splitext(name)[0], 'path': item_path.replace(root_path, "")})
+
+        result = { 'name': os.path.splitext(item_name)[0], 'path': item_path.replace(root_path, "") }
+        if len(item_sub_dirs) > 0:
+            result['dirs'] = item_sub_dirs
+        if len(item_sub_files) > 0:
+            result['files'] = item_sub_files
         return result
 
+    for item_name in os.listdir(root_path):
+        if not item_name.startswith(".") and item_name != 'index.html':
+            doctree.append(recurse_doc_tree(os.path.join(root_path, item_name)))
+    return doctree
 
+
+    #matches = {}
+    #for p, dirs, files in os.walk(path):
+    #    name = os.path.basename(p)
+    #    relpath = p.replace(path, "")
+    #    files2 = []
+    #    for f in files:
+    #        if not f.startswith("."):
+    #            fname = os.path.splitext(os.path.basename(f))[0]
+    #            fpath = os.path.join(relpath, f)
+    #            files2.append((fname, fpath))
+
+    #    matches.setdefault(p,[]).append(os.path.join)
+    #    result.append((name, relpath, files2))
+    #return result
