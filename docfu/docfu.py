@@ -155,7 +155,7 @@ class Docfu(object):
                 'GIT_REF': self.git_ref_val,
                 'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, 'assets'), 
                 'ALL_GIT_REFS': list_refs(self.dest_root),
-                'DOC_TREE': list_doc_tree(self.source_src_dir),
+                #'DOC_TREE': list_doc_tree(self.source_src_dir),
                 'TAG': get_git_tag(self.repository_dir),
                 'BRANCH': get_git_branch(self.repository_dir)
         }
@@ -164,7 +164,8 @@ class Docfu(object):
         """ Return a jinja2 Environment. """
         defaults = {
                 'extensions': [MarkdownJinja],
-                'loader': jinja2.FileSystemLoader(self.templates_src_dir)
+                'loader': jinja2.FileSystemLoader(self.source_src_dir),
+                #'loader': jinja2.FileSystemLoader(self.templates_src_dir)
         }
 
         defaults.update(options)
@@ -177,27 +178,27 @@ class Docfu(object):
             \n##################################################" % self.dest)
 
         for source_path in self.source_files:
-            with open(source_path, 'r') as source_file:
-                source_data = source_file.read().decode('utf-8', 'replace') 
+            source_path_relative = source_path.replace(self.source_src_dir+"/", "")
+            if source_path_relative.endswith(".html"):
+                #with open(source_path, 'r') as source_file:
+                    #source_data = source_file.read().decode('utf-8', 'replace') 
                 source_dest = self.source_dest_dir + source_path.replace(self.source_src_dir, "")
                 source_name = os.path.basename(source_dest)
-                self._render(source_name, source_data, source_dest)
+                self._render(source_name, source_path_relative, source_dest)
 
         logger.info("Documents rendered @ %s \
             \n##################################################" % self.dest)
 
-    def _render(self, name, content, dest): 
+    def _render(self, name, path, dest): 
         """ Render a single file. """
         logger.info("\t> Rendering document: %s --> %s" % (name, dest))
-        template = self._env.get_template(self.base_template)
-        md_html = content
+        template = self._env.get_template(path)
         #md_html = render_markdown(content) 
-        html = template.render(content=md_html, **self.template_globals)
+        html = template.render(**self.template_globals)
         dest_dir = os.path.dirname(dest)
         if not os.path.exists(dest_dir):
             os.makedirs(dest_dir)
 
-        self.template_globals = self._init_template_globals()
         # make extension .html
         dest = os.path.splitext(dest)[0] + '.html'
         with open(dest, 'wb') as output:
