@@ -67,10 +67,12 @@ class Docfu(object):
         if branch and self.git_repo:
             self.git_ref_type = 'branch'
             self.git_ref_val = branch
+            self.branch = branch
 
         elif tag and self.git_repo:
             self.git_ref_type = 'tag'
             self.git_ref_val = tag
+            self.tag = tag 
         else:
             self.git_ref_type = 'file'
             self.git_ref_val = os.path.basename(self.uri)
@@ -156,8 +158,8 @@ class Docfu(object):
                 'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, 'assets'), 
                 'ALL_GIT_REFS': list_refs(self.dest_root),
                 #'DOC_TREE': list_doc_tree(self.source_src_dir),
-                'TAG': get_git_tag(self.repository_dir),
-                'BRANCH': get_git_branch(self.repository_dir)
+                'TAG': get_git_tag(self.repository_dir) if not self.tag else self.tag,
+                'BRANCH': get_git_branch(self.repository_dir) if not self.branch else self.branch
         }
 
     def _init_template_engine(self, **options):
