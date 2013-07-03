@@ -64,6 +64,8 @@ class Docfu(object):
         branch = kwargs['branch'] if 'branch' in kwargs else None
         tag = kwargs['tag'] if 'tag' in kwargs else None
 
+        self.branch = ''
+        self.tag = ''
         if branch and self.git_repo:
             self.git_ref_type = 'branch'
             self.git_ref_val = branch
