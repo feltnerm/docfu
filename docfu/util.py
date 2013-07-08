@@ -162,8 +162,9 @@ def list_refs(path):
             result[ref_type]['path'] = x
             result[ref_type]['refs'] = []
             for y in glob.glob(os.path.join(x, '*')):
-                ref_value = os.path.basename(y)
-                result[ref_type]['refs'].append({ 'ref_val': ref_value, 'path': y })
+                if os.path.isdir(y):
+                    ref_value = os.path.basename(y)
+                    result[ref_type]['refs'].append({ 'ref_val': ref_value, 'path': y })
 
     return result
 
