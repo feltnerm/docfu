@@ -17,16 +17,17 @@ def parse_args(argv):
         help="A git tag to checkout.")
     argp.add_argument('-r', '--root-dir', default='docs/',
             help="Root directory which docs are built from.")
-    argp.add_argument('--source-dir', default="docs/src", 
+    argp.add_argument('--source-dir', default="docs/", 
         help="Source directory which to compile from.")
-    argp.add_argument('--templates-dir', default="docs/templates", 
+    argp.add_argument('--templates-dir', default="docs/_templates", 
         help="Directory to look for Jinaj2 templates in.")
-    argp.add_argument('--assets-dir', default="docs/assets", 
+    argp.add_argument('--assets-dir', default="docs/_static", 
         help="Directory to look for assets (css, js & images) in.")
     argp.add_argument('uri', nargs=1, 
         help="A URI pointing to a file path, git repository, or github shortened repo.")
     argp.add_argument('destination', nargs=1, 
         help="Destination for compiled source.")
+    argp.add_argument("--temp-dir" , default="/tmp/", help="Temporary directory to build docs")
     argp.add_argument("-c", "--config", 
             help="An [optional] configuration file to read.")
     argp.add_argument("-v", "--verbose", action='store_true', default=False,

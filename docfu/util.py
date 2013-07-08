@@ -126,10 +126,12 @@ def walk_files(path):
     """ Return a set of files found in `path`. """
     paths = set()
     logger.debug("Walking: %s" % path)
-    for current, dirs, files in os.walk(path):
+    for current, dirnames, files in os.walk(path):
+        dirnames[:] = [d for d in dirnames if not (d.startswith("_") or d.startswith("."))]
         for f in files:
-            paths.add(os.path.join(current, f))
-            logger.debug("Source file found: %s" % os.path.join(current, f))
+            if not (f.startswith("_") or f.startswith(".")):
+                paths.add(os.path.join(current, f))
+                logger.debug("Source file found: %s" % os.path.join(current, f))
     return paths
 
 def list_refs(path):

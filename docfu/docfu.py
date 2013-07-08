@@ -41,7 +41,7 @@ class Docfu(object):
 
     def __init__(self, uri, root, dest, **kwargs):
         self.uri = uri_parse(uri)
-        self.root = root
+        self.root = os.path.normpath(root)
         dest = os.path.abspath(os.path.expanduser(dest))
 
         self.template_globals = kwargs['template_globals'] if 'template_globals' in kwargs else {}
@@ -55,9 +55,9 @@ class Docfu(object):
             self.repository_dir = git_clone(self.uri)
             self.git_repo = True 
 
-        source_src_dir = kwargs['source_dir'] if 'source_dir' in kwargs else os.path.join(self.root, 'src')
-        assets_src_dir = kwargs['assets_dir'] if 'assets_dir' in kwargs else os.path.join(self.root, 'assets')
-        templates_src_dir = kwargs['templates_dir'] if 'templates_dir' in kwargs else os.path.join(self.root, 'templates')
+        source_src_dir = kwargs['source_dir'] if 'source_dir' in kwargs else self.root
+        assets_src_dir = kwargs['assets_dir'] if 'assets_dir' in kwargs else os.path.join(self.root, '_static')
+        templates_src_dir = kwargs['templates_dir'] if 'templates_dir' in kwargs else os.path.join(self.root, '_templates')
         self.source_src_dir = os.path.join(self.repository_dir, source_src_dir)
         self.assets_src_dir = os.path.join(self.repository_dir, assets_src_dir)
         self.templates_src_dir = os.path.join(self.repository_dir, templates_src_dir)
@@ -87,8 +87,8 @@ class Docfu(object):
 
         self.dest_root = dest
         self.dest = os.path.join(dest, self.git_ref_type, self.git_ref_val)
-        self.source_dest_dir = os.path.join(self.dest, 'html')
-        self.assets_dest_dir = os.path.join(self.dest, 'assets')
+        self.source_dest_dir = os.path.join(self.dest)
+        self.assets_dest_dir = os.path.join(self.dest, '_static')
         self._init_directories()
 
         self.template_globals = self._init_template_globals()
@@ -101,12 +101,12 @@ class Docfu(object):
 
     >> Source
     source: %s
-    assets: %s
+    static: %s
     templates: %s
 
     >> Dest
     dest: %s
-    assets: %s
+    static: %s
 
     >> Git ref
     type: %s
@@ -144,8 +144,10 @@ class Docfu(object):
 
         logger.debug("`os.makedirs(%s)`" % self.dest)
         os.makedirs(self.dest)
-        logger.debug("`os.makedirs(%s)`" % self.source_dest_dir)
-        os.makedirs(self.source_dest_dir)
+
+        if not os.path.exists(self.source_dest_dir):
+            logger.debug("`os.makedirs(%s)`" % self.source_dest_dir)
+            os.makedirs(self.source_dest_dir)
 
         logger.debug("`shutil.copytree.(%s, %s)`" % (self.assets_src_dir, self.assets_dest_dir))
         shutil.copytree(self.assets_src_dir, self.assets_dest_dir)
@@ -154,10 +156,10 @@ class Docfu(object):
         """ Return a dictionary of template globals to use in the
         templates. """
         return {
-                'URL_ROOT': "/"+self.git_ref_type+"/"+self.git_ref_val+"/html",
+                'URL_ROOT': "/"+self.git_ref_type+"/"+self.git_ref_val,
                 'GIT_REF_TYPE': self.git_ref_type,
                 'GIT_REF': self.git_ref_val,
-                'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, 'assets'), 
+                'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, '_static'), 
                 'ALL_GIT_REFS': list_refs(self.dest_root),
                 #'DOC_TREE': list_doc_tree(self.source_src_dir),
                 'TAG': get_git_tag(self.repository_dir) if not self.tag else self.tag,
@@ -169,6 +171,7 @@ class Docfu(object):
         defaults = {
                 'extensions': [MarkdownJinja],
                 'loader': jinja2.FileSystemLoader(self.source_src_dir),
+                #'loader': jinja2.FileSystemLoader([self.source_src_dir, self.templates_src_dir]),
                 #'loader': jinja2.FileSystemLoader(self.templates_src_dir)
         }
 
@@ -182,11 +185,11 @@ class Docfu(object):
             \n##################################################" % self.dest)
 
         for source_path in self.source_files:
-            source_path_relative = source_path.replace(self.source_src_dir+"/", "")
+            source_path_relative = source_path.replace(self.source_src_dir, "")
             if source_path_relative.endswith(".html"):
                 #with open(source_path, 'r') as source_file:
                     #source_data = source_file.read().decode('utf-8', 'replace') 
-                source_dest = self.source_dest_dir + source_path.replace(self.source_src_dir, "")
+                source_dest = os.path.join(self.source_dest_dir, source_path.replace(self.source_src_dir, ""))
                 source_name = os.path.basename(source_dest)
                 self._render(source_name, source_path_relative, source_dest)
 
