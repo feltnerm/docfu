@@ -1,4 +1,5 @@
 import glob
+import json
 import os
 import os.path
 import random
@@ -37,6 +38,12 @@ def uri_parse(u):
 
     return urlparse.urlunparse(url)
 
+def parse_package_json(json_path):
+
+    pkg = None
+    with open(json_path, 'r') as json_file:
+        pkg = json.loads(json_file.read())
+    return pkg
 
 #
 # Git / repository utils

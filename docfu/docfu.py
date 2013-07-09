@@ -29,7 +29,7 @@ import markdown
 
 from ext import render_markdown, MarkdownJinja
 from util import (git_clone, git_checkout, list_doc_tree, list_refs, tmp_mk, tmp_close, tmp_cp, 
-        walk_files, uri_parse, get_git_tag, get_git_branch)
+        walk_files, uri_parse, get_git_tag, get_git_branch, parse_package_json)
 
 logger = logging.getLogger('docfu')
 
@@ -162,6 +162,7 @@ class Docfu(object):
                 'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, '_static'), 
                 'ALL_GIT_REFS': list_refs(self.dest_root),
                 #'DOC_TREE': list_doc_tree(self.source_src_dir),
+                'PKG': parse_package_json(os.path.join(self.repository_dir, 'package.json')),
                 'TAG': get_git_tag(self.repository_dir) if not self.tag else self.tag,
                 'BRANCH': get_git_branch(self.repository_dir) if not self.branch else self.branch
         }
