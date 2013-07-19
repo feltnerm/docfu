@@ -171,14 +171,14 @@ class Docfu(object):
     def _tag(self):
         if self.git_repo and not self.tag:
             if not self.tag:
-                return get_git_Tag(self.repository_dir)
+                return get_git_tag(self.repository_dir)
             return self.tag
         return ""
 
     def _branch(self):
         if self.git_repo:
             if not self.branch:
-                return get_git_tag(self.repository_dir)
+                return get_git_branch(self.repository_dir)
             return self.branch
         return ""
 
