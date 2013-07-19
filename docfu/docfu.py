@@ -164,9 +164,23 @@ class Docfu(object):
                 'ALL_GIT_REFS': list_refs(self.dest_root),
                 #'DOC_TREE': list_doc_tree(self.source_src_dir),
                 'PKG': parse_package_json(os.path.join(self.repository_dir, 'package.json')),
-                'TAG': get_git_tag(self.repository_dir) if not self.tag else self.tag,
-                'BRANCH': get_git_branch(self.repository_dir) if not self.branch else self.branch
+                'TAG': self._tag(),
+                'BRANCH': self._branch()
         }
+
+    def _tag(self):
+        if self.git_repo and not self.tag:
+            if not self.tag:
+                return get_git_Tag(self.repository_dir)
+            return self.tag
+        return ""
+
+    def _branch(self):
+        if self.git_repo:
+            if not self.branch:
+                return get_git_tag(self.repository_dir)
+            return self.branch
+        return ""
 
     def _init_template_engine(self, **options):
         """ Return a jinja2 Environment. """

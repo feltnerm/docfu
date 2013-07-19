@@ -11,8 +11,7 @@ import tempfile
 import urlparse
 import logging
 
-from git import Git
-
+import git
 
 logger = logging.getLogger('docfu')
 
@@ -56,6 +55,9 @@ def git_clone(git_url):
     this class so it can be closed. """
     logger.debug("Cloning %s" % git_url)
     path = tmp_mk()
+    repo = git.Repo(path)
+    g = repo.git
+    g.clone(git_url, path)
     git_clone_cmd = shlex.split('git clone %s %s' % (str(git_url), str(path)))
     logger.debug("%s"  % git_clone_cmd)
     retcode = subprocess.check_call(git_clone_cmd)
@@ -65,6 +67,7 @@ def git_clone(git_url):
 def git_checkout(git_repo_path, ref_type, ref_val):
     """ Checkout the code at git_repo_path. Ref is the specific branch or 
     tag to use. """
+    repo = git.Repo(path)
     if ref_type == 'branch':
         git_checkout_cmd = shlex.split('git checkout %s' % str(ref_val))
 
@@ -77,9 +80,10 @@ def git_checkout(git_repo_path, ref_type, ref_val):
     logger.info(output)
 
 def get_git_tag(git_repo_path):
-    g = Git(git_repo_path)
-    g.init()
-    return g.describe('--tags', g.rev_list('--tags', max_count=1))
+    repo = git.Repo(git_repo_path)
+    g = repo.git
+    tag = g.describe('--tags', g.rev_list('--tags', max_count=1))
+    return tag
 
 def get_git_branch(git_repo_path):
     cmd = shlex.split("git rev-parse --abbrev-ref HEAD")
