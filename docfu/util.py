@@ -64,7 +64,6 @@ def git_clone(git_url):
 def git_checkout(git_repo_path, ref_type, ref_val):
     """ Checkout the code at git_repo_path. Ref is the specific branch or 
     tag to use. """
-    repo = git.Repo(path)
     if ref_type == 'branch':
         git_checkout_cmd = shlex.split('git checkout %s' % str(ref_val))
 
