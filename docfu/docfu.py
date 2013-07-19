@@ -22,6 +22,7 @@ Then you have access to the Docfu api which will allow you to:
 :license: MIT see LICENSE for more details
 """
 
+from __future__ import with_statement
 import logging, os.path, shutil
 
 import jinja2
