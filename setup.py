@@ -9,7 +9,7 @@ except ImportError:
 settings = {}
 settings.update(
     name="docfu",
-    version='0.0.5',
+    version='0.1.0',
     author='Mark Feltner',
     author_email='feltner.mj@gmail.com',
     license="MIT",
@@ -18,24 +18,22 @@ settings.update(
     description="Generate static docs from a git repo.",
     long_description=open('README').read(),
     install_requires=[
-        "Jinja2>=2.7",
-        "distribute>=0.6.46",
-        "Markdown>=2.3.1",
-        "Pygments>=1.6",
-        "argparse>=1.2.1",
-        "mdx-smartypants>=1.3",
+        "argparse",
+        "distribute",
+        "Jinja2",
+        "Markdown",
+        "Pygments",
+        "argparse",
+        "mdx_smartypants",
+        "GitPython"
     ],
     classifiers=(
         'Environment :: Console',
         'Intended Audience :: Developers',
         'Natural Language :: English',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
-        #'Programming Language :: Python :: 3',
-        #'Programming Language :: Python :: 3.1',
-        #'Programming Language :: Python :: 3.2', 
+        'Programming Language :: Python :: 2.7'
     ),
     entry_points={
         'console_scripts': [

@@ -11,6 +11,9 @@ import tempfile
 import urlparse
 import logging
 
+from git import Git
+
+
 logger = logging.getLogger('docfu')
 
 #
@@ -66,7 +69,7 @@ def git_checkout(git_repo_path, ref_type, ref_val):
         git_checkout_cmd = shlex.split('git checkout %s' % str(ref_val))
 
     if ref_type == 'tag':
-        git_checkout_cmd = shlex.split('git checkout -b %s' % str(tag))
+        git_checkout_cmd = shlex.split('git checkout -b %s' % str(ref_val))
 
     logger.debug("Checking out %s: %s" % (ref_type, ref_val))
     logger.debug("%s" % git_checkout_cmd)
@@ -74,15 +77,9 @@ def git_checkout(git_repo_path, ref_type, ref_val):
     logger.info(output)
 
 def get_git_tag(git_repo_path):
-    cmd = shlex.split("git describe --tags $(git rev-list --tags --max-count=1)")
-    logger.debug("Getting git tag: %s" % cmd)
-    p = subprocess.Popen(cmd, cwd="%s" % str(git_repo_path), stdout=subprocess.PIPE)
-    out, err = p.communicate()
-    if out and not err:
-        logger.debug("Tag: %s" % out)
-        return out 
-    logger.error("%s" % err)
-    return ''
+    g = Git(git_repo_path)
+    g.init()
+    return g.describe('--tags', g.rev_list('--tags', max_count=1))
 
 def get_git_branch(git_repo_path):
     cmd = shlex.split("git rev-parse --abbrev-ref HEAD")
@@ -161,7 +158,7 @@ def list_refs(path):
     result = {}
     if os.path.isdir(path):
         logger.debug("Listing refs for root path: %s" % path)
-        ref_types = [(x, os.path.basename(x)) for x in glob.glob(os.path.join(path, '*'))]
+        #ref_types = [(x, os.path.basename(x)) for x in glob.glob(os.path.join(path, '*'))]
 
         for x in glob.glob(os.path.join(path, '*')):
             ref_type = os.path.basename(x)
