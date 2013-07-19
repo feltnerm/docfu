@@ -55,9 +55,6 @@ def git_clone(git_url):
     this class so it can be closed. """
     logger.debug("Cloning %s" % git_url)
     path = tmp_mk()
-    repo = git.Repo(path)
-    g = repo.git
-    g.clone(git_url, path)
     git_clone_cmd = shlex.split('git clone %s %s' % (str(git_url), str(path)))
     logger.debug("%s"  % git_clone_cmd)
     retcode = subprocess.check_call(git_clone_cmd)
