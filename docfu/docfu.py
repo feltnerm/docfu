@@ -14,7 +14,7 @@ To use:
         df()
 
 Then you have access to the Docfu api which will allow you to:
-    * `df.render()` -- render docs by running them through a Markdown processor 
+    * `df.render()` -- render docs by running them through a Markdown processor
     then finally a Jinaj2 processor. Returns an string of HTML ready to be
     written to file or returned as a response on a server.
 
@@ -29,7 +29,7 @@ import jinja2
 import markdown
 
 from ext import render_markdown, MarkdownJinja
-from util import (git_clone, git_checkout, list_doc_tree, list_refs, tmp_mk, tmp_close, tmp_cp, 
+from util import (git_clone, git_checkout, list_doc_tree, list_refs, tmp_mk, tmp_close, tmp_cp,
         walk_files, uri_parse, get_git_tag, get_git_branch, parse_package_json)
 
 logger = logging.getLogger('docfu')
@@ -37,7 +37,7 @@ logger = logging.getLogger('docfu')
 class Docfu(object):
     """
     A class which converts Markdown files in one git directory to HTML files in
-    another. Made for documentation generation, this class also provides global 
+    another. Made for documentation generation, this class also provides global
     template variables and processing."""
 
     def __init__(self, uri, root, dest, **kwargs):
@@ -54,7 +54,7 @@ class Docfu(object):
             self.git_repo = False
         else:
             self.repository_dir = git_clone(self.uri)
-            self.git_repo = True 
+            self.git_repo = True
 
         source_src_dir = kwargs['source_dir'] if 'source_dir' in kwargs else self.root
         assets_src_dir = kwargs['assets_dir'] if 'assets_dir' in kwargs else os.path.join(self.root, '_static')
@@ -75,7 +75,7 @@ class Docfu(object):
         elif tag and self.git_repo:
             self.git_ref_type = 'tag'
             self.git_ref_val = tag
-            self.tag = tag 
+            self.tag = tag
         else:
             self.git_ref_type = 'file'
             self.git_ref_val = os.path.basename(self.uri)
@@ -112,10 +112,10 @@ class Docfu(object):
     >> Git ref
     type: %s
     value: %s
-        """ % (self.uri, self.root, self.dest, 
-            self.source_src_dir, self.assets_src_dir, self.templates_src_dir, 
+        """ % (self.uri, self.root, self.dest,
+            self.source_src_dir, self.assets_src_dir, self.templates_src_dir,
             self.source_dest_dir, self.assets_dest_dir,
-            self.template_globals['GIT_REF_TYPE'], 
+            self.template_globals['GIT_REF_TYPE'],
             self.template_globals['GIT_REF']))
 
         logger.debug(self.template_globals)
@@ -160,7 +160,7 @@ class Docfu(object):
                 'URL_ROOT': "/"+self.git_ref_type+"/"+self.git_ref_val,
                 'GIT_REF_TYPE': self.git_ref_type,
                 'GIT_REF': self.git_ref_val,
-                'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, '_static'), 
+                'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, '_static'),
                 'ALL_GIT_REFS': list_refs(self.dest_root),
                 #'DOC_TREE': list_doc_tree(self.source_src_dir),
                 'PKG': parse_package_json(os.path.join(self.repository_dir, 'package.json')),
@@ -195,16 +195,16 @@ class Docfu(object):
         return jinja2.Environment(**defaults)
 
     def render(self):
-        """ Render the docs found in the repository's source-dir into the 
+        """ Render the docs found in the repository's source-dir into the
         destination dir. """
         logger.info("Rendering documents @ %s \
             \n##################################################" % self.dest)
 
         for source_path in self.source_files:
             source_path_relative = source_path.replace(self.source_src_dir, "")
-            if source_path_relative.endswith(".html"):
+            if source_path_relative.endswith(".jmd") or source_path_relative.endswith(".html"):
                 #with open(source_path, 'r') as source_file:
-                    #source_data = source_file.read().decode('utf-8', 'replace') 
+                    #source_data = source_file.read().decode('utf-8', 'replace')
                 source_dest = os.path.join(self.source_dest_dir, source_path.replace(self.source_src_dir, ""))
                 source_name = os.path.basename(source_dest)
                 self._render(source_name, source_path_relative, source_dest)
@@ -212,11 +212,11 @@ class Docfu(object):
         logger.info("Documents rendered @ %s \
             \n##################################################" % self.dest)
 
-    def _render(self, name, path, dest): 
+    def _render(self, name, path, dest):
         """ Render a single file. """
         logger.info("\t> Rendering document: %s --> %s" % (name, dest))
         template = self._env.get_template(path)
-        #md_html = render_markdown(content) 
+        #md_html = render_markdown(content)
         html = template.render(**self.template_globals)
         dest_dir = os.path.dirname(dest)
         if not os.path.exists(dest_dir):
