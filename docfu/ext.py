@@ -4,8 +4,8 @@ import jinja2.ext
 import markdown as md 
 
 markd = md.Markdown(extensions=[
-    'extra', 'tables', 'codehilite', 'headerid', 'nl2br', 'sane_lists', 
-    'wikilinks', 'smartypants'],
+    'attr_list', 'fenced_code', 'smart_strong', 'tables', 'codehilite', 
+    'headerid', 'sane_lists', 'wikilinks', 'smartypants'],
     output_format='html5')
 
 render_markdown = lambda text: markd.convert(text)
