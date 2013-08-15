@@ -200,6 +200,7 @@ class Docfu(object):
         logger.info("Rendering documents @ %s \
             \n##################################################" % self.dest)
 
+        self.source_files = sorted(self.source_files)
         for source_path in self.source_files:
             source_path_relative = source_path.replace(self.source_src_dir, "")
             if source_path_relative.endswith(".jmd") or source_path_relative.endswith(".html"):
