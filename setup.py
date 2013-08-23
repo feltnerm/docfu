@@ -8,24 +8,24 @@ except ImportError:
 
 settings = {}
 settings.update(
-    name="docfu",
+    name='docfu',
     version='0.1.0',
     author='Mark Feltner',
     author_email='feltner.mj@gmail.com',
-    license="MIT",
-    url="https://github.com/feltnerm/docfu",
-    packages=['docfu',],
-    description="Generate static docs from a git repo.",
+    license='MIT',
+    url='https://github.com/feltnerm/docfu',
+    packages=['docfu', ],
+    description='Generate static docs from a git repo.',
     long_description=open('README').read(),
     install_requires=[
-        "argparse",
-        "distribute",
-        "Jinja2",
-        "Markdown",
-        "Pygments",
-        "argparse",
-        "mdx_smartypants",
-        "GitPython"
+        'argparse',
+        'distribute',
+        'Jinja2',
+        'Markdown',
+        'Pygments',
+        'argparse',
+        'mdx_smartypants',
+        'GitPython'
     ],
     classifiers=(
         'Environment :: Console',
@@ -38,7 +38,7 @@ settings.update(
     entry_points={
         'console_scripts': [
             'docfu = docfu.cli:main',
-        ],     
+        ]
     }
 )
 

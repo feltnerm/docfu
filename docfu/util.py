@@ -15,6 +15,7 @@ import git
 
 logger = logging.getLogger('docfu')
 
+
 #
 # Utils
 #
@@ -24,7 +25,7 @@ def uri_parse(u):
         * git path: "http://github.com/feltnerm/foo.git"
         * filesystem path: "~/Projects/foo"
 
-        This functions parses a provided URL string matching one of those 
+        This functions parses a provided URL string matching one of those
         three categories. """
     url = urlparse.urlparse(u)
 
@@ -40,6 +41,7 @@ def uri_parse(u):
 
     return urlparse.urlunparse(url)
 
+
 def parse_package_json(json_path):
 
     pkg = None
@@ -47,22 +49,23 @@ def parse_package_json(json_path):
         pkg = json.loads(json_file.read())
     return pkg
 
+
 #
 # Git / repository utils
 #
 def git_clone(git_url):
-    """ Clone a github url into a temp directory. Set a global object to 
+    """ Clone a github url into a temp directory. Set a global object to
     this class so it can be closed. """
     logger.debug("Cloning %s" % git_url)
     path = tmp_mk()
     git_clone_cmd = shlex.split('git clone %s %s' % (str(git_url), str(path)))
-    logger.debug("%s"  % git_clone_cmd)
+    logger.debug("%s" % git_clone_cmd)
     retcode = subprocess.check_call(git_clone_cmd)
-    return path 
+    return path
 
 
 def git_checkout(git_repo_path, ref_type, ref_val):
-    """ Checkout the code at git_repo_path. Ref is the specific branch or 
+    """ Checkout the code at git_repo_path. Ref is the specific branch or
     tag to use. """
     if ref_type == 'branch':
         git_checkout_cmd = shlex.split('git checkout %s' % str(ref_val))
@@ -72,8 +75,10 @@ def git_checkout(git_repo_path, ref_type, ref_val):
 
     logger.debug("Checking out %s: %s" % (ref_type, ref_val))
     logger.debug("%s" % git_checkout_cmd)
-    output = subprocess.Popen(git_checkout_cmd, cwd="%s" % str(git_repo_path)).communicate()
+    output = subprocess.Popen(git_checkout_cmd,
+        cwd="%s" % str(git_repo_path)).communicate()
     logger.info(output)
+
 
 def get_git_tag(git_repo_path):
     repo = git.Repo(git_repo_path)
@@ -81,22 +86,25 @@ def get_git_tag(git_repo_path):
     tag = g.describe('--tags', g.rev_list('--tags', max_count=1))
     return tag
 
+
 def get_git_branch(git_repo_path):
     cmd = shlex.split("git rev-parse --abbrev-ref HEAD")
     logger.debug("Getting git branch: %s" % cmd)
-    p = subprocess.Popen(cmd, cwd="%s" % str(git_repo_path), stdout=subprocess.PIPE)
+    p = subprocess.Popen(cmd, cwd="%s" % str(git_repo_path),
+        stdout=subprocess.PIPE)
     out, err = p.communicate()
     if out and not err:
         logger.debug("Branch: %s" % out)
-        return out 
+        return out
     logger.error("%s" % err)
-    return '' 
+    return ''
+
+
 #
 # Temporary File / Directory Utilities
 #
-
 def tmp_mk():
-    """ Make a temporary directory, already prefixed with `docfu-`, 
+    """ Make a temporary directory, already prefixed with `docfu-`,
     in `/tmp/`."""
     if not os.path.isdir(os.path.expanduser("~/tmp")):
         os.makedirs(os.path.expanduser("~/tmp"))
@@ -112,38 +120,45 @@ def tmp_close(path):
         logger.debug("Temporary path removed at: %s" % path)
     except Exception, e:
         if e.errno != 2:
-            logger.error("Cannot remove temporary path %s. Error %s" % (path, e))
+            logger.error("Cannot remove temporary path %s. Error %s"
+                % (path, e))
             raise
 
+
 def tmp_cp(src):
-    """ Copy the source directory to a tmp directory. 
+    """ Copy the source directory to a tmp directory.
 
     @TODO: ignore version control and other things.
     """
     dest = tmp_mk()
-    dest = os.path.join(os.path.expanduser("~"), 'tmp', 'docfu-%s' % random.randint(999, 10000))
-    shutil.copytree(src, dest, ignore=shutil.ignore_patterns('*.git', 'node_modules'))
+    dest = os.path.join(os.path.expanduser("~"), 'tmp',
+        'docfu-%s' % random.randint(999, 10000))
+    shutil.copytree(src, dest,
+        ignore=shutil.ignore_patterns('*.git', 'node_modules'))
     logger.debug("Copied source files %s to tempdir %s" % (src, dest))
     return dest
+
 
 def walk_files(path):
     """ Return a set of files found in `path`. """
     paths = set()
     logger.debug("Walking: %s" % path)
     for current, dirnames, files in os.walk(path):
-        dirnames[:] = [d for d in dirnames if not (d.startswith("_") or d.startswith("."))]
+        dirnames[:] = filter(lambda x: not (x.startswith("_") or x.startswith(".")), dirnames)
         for f in files:
             if not (f.startswith("_") or f.startswith(".")):
                 paths.add(os.path.join(current, f))
-                logger.debug("Source file found: %s" % os.path.join(current, f))
+                logger.debug("Source file found: %s" %
+                    os.path.join(current, f))
     return paths
 
+
 def list_refs(path):
-    """ Return the list of branches/tags found in the root `path`. 
+    """ Return the list of branches/tags found in the root `path`.
     We assume the folder structure is like so:
         `<root>[/<ref_type>[/<ref_name>]]`
     {
-        <ref_type> : 
+        <ref_type> :
             {
                 <path>: '',
                 <refs>: [
@@ -158,7 +173,6 @@ def list_refs(path):
     result = {}
     if os.path.isdir(path):
         logger.debug("Listing refs for root path: %s" % path)
-        #ref_types = [(x, os.path.basename(x)) for x in glob.glob(os.path.join(path, '*'))]
 
         for x in glob.glob(os.path.join(path, '*')):
             ref_type = os.path.basename(x)
@@ -168,9 +182,13 @@ def list_refs(path):
             for y in glob.glob(os.path.join(x, '*')):
                 if os.path.isdir(y):
                     ref_value = os.path.basename(y)
-                    result[ref_type]['refs'].append({ 'ref_val': ref_value, 'path': y })
+                    result[ref_type]['refs'].append({
+                        'ref_val': ref_value,
+                        'path': y
+                    })
 
     return result
+
 
 def list_doc_tree(root_path):
     """ Returns a 'tree-like' structure for navigation. """
@@ -187,12 +205,20 @@ def list_doc_tree(root_path):
             for name in os.listdir(item_path):
                 if not name.startswith(".") and name != 'index.html':
                     if os.path.isdir(os.path.join(item_path, name)):
-                            item_sub_dirs.append(recurse_doc_tree(os.path.join(item_path, name)))
+                            item_sub_dirs.append(
+                                recurse_doc_tree(os.path.join(item_path,
+                                                              name)))
 
                     elif os.path.isfile(os.path.join(item_path, name)):
-                        item_sub_files.append({ 'name': os.path.splitext(name)[0], 'path': item_path.replace(root_path, "")})
+                        item_sub_files.append({
+                            'name': os.path.splitext(name)[0],
+                            'path': item_path.replace(root_path, "")
+                        })
 
-        result = { 'name': os.path.splitext(item_name)[0], 'path': item_path.replace(root_path, "") }
+        result = {
+            'name': os.path.splitext(item_name)[0],
+            'path': item_path.replace(root_path, "")
+        }
         if len(item_sub_dirs) > 0:
             result['dirs'] = item_sub_dirs
         if len(item_sub_files) > 0:
@@ -201,7 +227,9 @@ def list_doc_tree(root_path):
 
     for item_name in os.listdir(root_path):
         if not item_name.startswith(".") and item_name != 'index.html':
-            doctree.append(recurse_doc_tree(os.path.join(root_path, item_name)))
+            doctree.append(
+                recurse_doc_tree(os.path.join(root_path,
+                                              item_name)))
     return doctree
 
 

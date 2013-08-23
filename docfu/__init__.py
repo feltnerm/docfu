@@ -9,10 +9,21 @@ import jinja2
 import markdown
 
 from ext import render_markdown, MarkdownJinja
-from util import (git_clone, git_checkout, list_doc_tree, list_refs, tmp_mk, tmp_close, tmp_cp,
-        walk_files, uri_parse, get_git_tag, get_git_branch, parse_package_json)
+from util import (
+    git_clone, git_checkout,
+    list_doc_tree, list_refs,
+    tmp_mk, tmp_close, tmp_cp,
+    get_git_tag, get_git_branch,
+    parse_package_json, walk_files, uri_parse
+)
 
-logger = logging.getLogger('docfu')
+__major__ = 0
+__minor__ = 1
+__micro__ = 0
+__version__ = "{0}.{1}.{2}".format(__major__, __minor__, __micro__)
+
+logger = logging.getLogger(__name__)
+
 
 class Docfu(object):
     """
@@ -21,12 +32,18 @@ class Docfu(object):
     template variables and processing."""
 
     def __init__(self, uri, root, dest, **kwargs):
+        """ Docfu initialzation. """
         self.uri = uri_parse(uri)
         self.root = os.path.normpath(root)
         dest = os.path.abspath(os.path.expanduser(dest))
 
-        self.template_globals = kwargs['template_globals'] if 'template_globals' in kwargs else {}
-        self.base_template = kwargs['base_template'] if 'base_template' in kwargs else 'base.html'
+        self.template_globals = {}
+        if 'template_globals' in kwargs:
+            self.template_globals = kwargs['template_globals']
+
+        self.base_template = 'base.html'
+        if 'base_template' in kwargs:
+            self.base_template = kwargs['base_template']
 
         if self.uri.startswith('file://'):
             self.uri = self.uri.replace("file://", "")
@@ -36,12 +53,23 @@ class Docfu(object):
             self.repository_dir = git_clone(self.uri)
             self.git_repo = True
 
-        source_src_dir = kwargs['source_dir'] if 'source_dir' in kwargs else self.root
-        assets_src_dir = kwargs['assets_dir'] if 'assets_dir' in kwargs else os.path.join(self.root, '_static')
-        templates_src_dir = kwargs['templates_dir'] if 'templates_dir' in kwargs else os.path.join(self.root, '_templates')
+        source_src_dir = self.root
+        if 'source_dir' in kwargs:
+            source_src_dir = kwargs['source_dir']
+
+        assets_src_dir = os.path.join(self.root, '_static')
+        if 'assets_dir' in kwargs:
+            assets_src_dir = kwargs['assets_dir']
+
+        templates_src_dir = os.path.join(self.root, '_templates')
+        if 'templates_dir' in kwargs:
+            templates_src_dir = kwargs['templates_dir']
+
         self.source_src_dir = os.path.join(self.repository_dir, source_src_dir)
         self.assets_src_dir = os.path.join(self.repository_dir, assets_src_dir)
-        self.templates_src_dir = os.path.join(self.repository_dir, templates_src_dir)
+
+        self.templates_src_dir = os.path.join(self.repository_dir,
+            templates_src_dir)
         branch = kwargs['branch'] if 'branch' in kwargs else None
         tag = kwargs['tag'] if 'tag' in kwargs else None
 
@@ -61,7 +89,8 @@ class Docfu(object):
             self.git_ref_val = os.path.basename(self.uri)
 
         if self.git_repo:
-            git_checkout(self.repository_dir, self.git_ref_type, self.git_ref_val)
+            git_checkout(self.repository_dir, self.git_ref_type,
+                self.git_ref_val)
 
         if "/" in self.git_ref_val:
             self.git_ref_val = self.git_ref_val.replace("/", "_")
@@ -74,35 +103,32 @@ class Docfu(object):
 
         self.template_globals = self._init_template_globals()
 
-        logger.debug(
-        """> Docfu
-    uri: %s
-    root: %s
-    dest: %s
+        logger.debug("""> Docfu
+uri: %s
+root: %s
+dest: %s
 
-    >> Source
-    source: %s
-    static: %s
-    templates: %s
+>> Source
+source: %s
+static: %s
+templates: %s
 
-    >> Dest
-    dest: %s
-    static: %s
+>> Dest
+dest: %s
+static: %s
 
-    >> Git ref
-    type: %s
-    value: %s
-        """ % (self.uri, self.root, self.dest,
-            self.source_src_dir, self.assets_src_dir, self.templates_src_dir,
-            self.source_dest_dir, self.assets_dest_dir,
-            self.template_globals['GIT_REF_TYPE'],
-            self.template_globals['GIT_REF']))
+>> Git ref
+type: %s
+value: %s """ % (self.uri, self.root, self.dest,
+    self.source_src_dir, self.assets_src_dir, self.templates_src_dir,
+    self.source_dest_dir, self.assets_dest_dir,
+    self.template_globals['GIT_REF_TYPE'],
+    self.template_globals['GIT_REF']))
 
         logger.debug(self.template_globals)
 
         self.source_files = walk_files(self.source_src_dir)
         self._env = self._init_template_engine()
-
 
     def __enter__(self):
         return self
@@ -130,22 +156,25 @@ class Docfu(object):
             logger.debug("`os.makedirs(%s)`" % self.source_dest_dir)
             os.makedirs(self.source_dest_dir)
 
-        logger.debug("`shutil.copytree.(%s, %s)`" % (self.assets_src_dir, self.assets_dest_dir))
+        logger.debug("`shutil.copytree.(%s, %s)`" %
+                (self.assets_src_dir, self.assets_dest_dir))
         shutil.copytree(self.assets_src_dir, self.assets_dest_dir)
 
     def _init_template_globals(self):
         """ Return a dictionary of template globals to use in the
         templates. """
         return {
-                'URL_ROOT': "/"+self.git_ref_type+"/"+self.git_ref_val,
-                'GIT_REF_TYPE': self.git_ref_type,
-                'GIT_REF': self.git_ref_val,
-                'ASSETS': os.path.join('/', self.git_ref_type, self.git_ref_val, '_static'),
-                'ALL_GIT_REFS': list_refs(self.dest_root),
-                #'DOC_TREE': list_doc_tree(self.source_src_dir),
-                'PKG': parse_package_json(os.path.join(self.repository_dir, 'package.json')),
-                'TAG': self._tag(),
-                'BRANCH': self._branch()
+            'URL_ROOT': "/" + self.git_ref_type + "/" + self.git_ref_val,
+            'GIT_REF_TYPE': self.git_ref_type,
+            'GIT_REF': self.git_ref_val,
+            'ASSETS': os.path.join('/', self.git_ref_type,
+                                   self.git_ref_val, '_static'),
+            'ALL_GIT_REFS': list_refs(self.dest_root),
+            #'DOC_TREE': list_doc_tree(self.source_src_dir),
+            'PKG': parse_package_json(
+                os.path.join(self.repository_dir, 'package.json')),
+            'TAG': self._tag(),
+            'BRANCH': self._branch()
         }
 
     def _tag(self):
@@ -165,10 +194,8 @@ class Docfu(object):
     def _init_template_engine(self, **options):
         """ Return a jinja2 Environment. """
         defaults = {
-                'extensions': [MarkdownJinja],
-                'loader': jinja2.FileSystemLoader(self.source_src_dir),
-                #'loader': jinja2.FileSystemLoader([self.source_src_dir, self.templates_src_dir]),
-                #'loader': jinja2.FileSystemLoader(self.templates_src_dir)
+            'extensions': [MarkdownJinja],
+            'loader': jinja2.FileSystemLoader(self.source_src_dir),
         }
 
         defaults.update(options)
@@ -177,21 +204,21 @@ class Docfu(object):
     def render(self):
         """ Render the docs found in the repository's source-dir into the
         destination dir. """
-        logger.info("Rendering documents @ %s \
-            \n##################################################" % self.dest)
+        logger.info("Rendering documents @ %s" % self.dest)
 
         self.source_files = sorted(self.source_files)
         for source_path in self.source_files:
             source_path_relative = source_path.replace(self.source_src_dir, "")
             if source_path_relative.endswith(".jmd") or source_path_relative.endswith(".html"):
                 #with open(source_path, 'r') as source_file:
-                    #source_data = source_file.read().decode('utf-8', 'replace')
-                source_dest = os.path.join(self.source_dest_dir, source_path.replace(self.source_src_dir, ""))
+                    #source_data = source_file.read().decode('utf-8',
+                    #    'replace')
+                source_dest = os.path.join(self.source_dest_dir,
+                    source_path.replace(self.source_src_dir, ""))
                 source_name = os.path.basename(source_dest)
                 self._render(source_name, source_path_relative, source_dest)
 
-        logger.info("Documents rendered @ %s \
-            \n##################################################" % self.dest)
+        logger.info("Documents rendered @ %s" % self.dest)
 
     def _render(self, name, path, dest):
         """ Render a single file. """

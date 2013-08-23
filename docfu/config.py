@@ -1,12 +1,14 @@
-import os, os.path
+import os
+import os.path
 import ConfigParser
+
 
 class Config(object):
 
     def __init__(self, config_path=""):
         self.cp = ConfigParser.ConfigParser()
         self.section_default = 'docfu'
-        self.config_path = config_path 
+        self.config_path = config_path
 
     def read(self):
         self.cp.read(self.config_path)
