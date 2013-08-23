@@ -1,29 +1,9 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""
-docfu
------
-
-Generates per-branch and/or -version documentation from Markdown files via a git
-repository.
-
-To use:
-    from docfu import Docfu
-
-    with Docfu(uri="feltnerm/Docfu", root="docs/", dest="/tmp/docs") as df:
-        df()
-
-Then you have access to the Docfu api which will allow you to:
-    * `df.render()` -- render docs by running them through a Markdown processor
-    then finally a Jinaj2 processor. Returns an string of HTML ready to be
-    written to file or returned as a response on a server.
-
-:copyright: (c) 2013 by Mark Feltner
-:license: MIT see LICENSE for more details
-"""
-
 from __future__ import with_statement
-import logging, os.path, shutil
+
+import logging
+import os.path
+import shutil
 
 import jinja2
 import markdown
