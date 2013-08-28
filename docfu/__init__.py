@@ -4,6 +4,8 @@ from __future__ import with_statement
 import logging
 import os.path
 import shutil
+import sys
+import time
 
 import jinja2
 import markdown
@@ -130,6 +132,7 @@ value: %s """ % (self.uri, self.root, self.dest,
         self.source_files = walk_files(self.source_src_dir)
         self._env = self._init_template_engine()
 
+
     def __enter__(self):
         return self
 
@@ -200,6 +203,26 @@ value: %s """ % (self.uri, self.root, self.dest,
 
         defaults.update(options)
         return jinja2.Environment(**defaults)
+
+    def watch(self):
+        try:
+            watcher = util.folder_watcher(self.source_src_dir, ['jmd', 'html'])
+            while True:
+                modified = next(watcher)
+                if modified:
+                    self.render()
+
+        except KeyboardInterrupt:
+            logger.warning("Keyboard interrupt, quitting.")
+            sys.exit(0)
+
+        except Exception as e:
+            logger.critical(e.args)
+            raise
+            logger.warning(
+                'Caught exception "{0}". Reloading.'.format(e))
+        finally:
+            time.sleep(.5)  # sleep to avoid cpu load
 
     def render(self):
         """ Render the docs found in the repository's source-dir into the

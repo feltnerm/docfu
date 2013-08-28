@@ -1,3 +1,4 @@
+import fnmatch
 import glob
 import json
 import os
@@ -232,6 +233,37 @@ def list_doc_tree(root_path):
                                               item_name)))
     return doctree
 
+def folder_watcher(path, extensions, ignores=[]):
+    '''Generator for monitoring a folder for modifications.
+
+    Returns a boolean indicating if files are changed since last check.
+    Returns None if there are no matching files in the folder'''
+
+    def file_times(path):
+        '''Return `mtime` for each file in path'''
+
+        for root, dirs, files in os.walk(path):
+            dirs[:] = [x for x in dirs if not x.startswith(os.curdir)]
+
+            for f in files:
+                if (f.endswith(tuple(extensions)) and
+                    not any(fnmatch.fnmatch(f, ignore) for ignore in ignores)):
+                    try:
+                        yield os.stat(os.path.join(root, f)).st_mtime
+                    except OSError as e:
+                        logger.warning('Caught Exception: {}'.format(e))
+
+    LAST_MTIME = 0
+    while True:
+        try:
+            mtime = max(file_times(path))
+            if mtime > LAST_MTIME:
+                LAST_MTIME = mtime
+                yield True
+        except ValueError:
+            yield None
+        else:
+            yield False
 
     #matches = {}
     #for p, dirs, files in os.walk(path):

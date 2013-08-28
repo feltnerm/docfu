@@ -66,6 +66,11 @@ def parse_args(argv):
         nargs=1,
         help='Destination for compiled source.')
 
+    argp.add_argument('-w', '--watch',
+        action='store_true',
+        default=False,
+        help='Run the watcher to recompile on change.')
+
     argp.add_argument('-v', '--verbose',
         action='store_const',
         const=logging.INFO,
@@ -105,7 +110,11 @@ def main(argv=None):
 
     log.init(options.get('verbosity', logging.DEBUG))
     with Docfu(uri, root, dest, **options) as df:
-        df()
+        if options.get('watch', False):
+            df()
+            df.watch()
+        else:
+            df()
 
     return 0  # success
 
