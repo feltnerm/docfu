@@ -1,0 +1,23 @@
+{
+  "name": "dotfiles",
+  "dependencies": {
+    "bower": "~1.2.4",
+    "coffee-script": "~1.6.3",
+    "coffeelint": "~0.5.7",
+    "docco": "~0.6.2",
+    "generator-mocha": "~0.1.1",
+    "generator-webapp": "~0.3.1",
+    "grunt": "~0.4.1",
+    "grunt-cli": "~0.1.9",
+    "jade": "~0.35.0",
+    "js2coffee": "~0.1.4",
+    "jsbeautify": "~0.3.6",
+    "node-inspector": "~0.3.4",
+    "jshint": "~2.1.10",
+    "jslint": "~0.1.9",
+    "jsonlint": "~1.6.0",
+    "uglify-js": "~2.4.0",
+    "wd": "~0.1.0",
+    "yo": "~1.0.3"
+  }
+}
