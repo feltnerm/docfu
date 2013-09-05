@@ -66,6 +66,8 @@ def parse_args(argv):
         nargs=1,
         help='Destination for compiled source.')
 
+    argp.add_argument('-l', '--log-file', help='File to log to.')
+
     argp.add_argument('-v', '--verbose',
         action='store_const',
         const=logging.INFO,
