@@ -47,7 +47,7 @@ class Docfu(object):
 
         if self.uri.startswith('file://'):
             self.uri = self.uri.replace("file://", "")
-            self.repository_dir = tmp_cp(os.path.expanduser(self.uri))
+            self.repository_dir = os.path.expanduser(self.uri)
             self.git_repo = False
         else:
             self.repository_dir = git_clone(self.uri)
