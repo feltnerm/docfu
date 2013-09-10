@@ -119,6 +119,7 @@ class Docfu(object):
         self.log_file = os.path.join(self.dest, 'log.txt')
         if kwargs.get('log_file'):
             self.log_file = kwargs['log_file']
+
         logger.addHandler(logging.FileHandler(
             filename=self.log_file,
             mode='w'))
@@ -245,7 +246,7 @@ value: %s """ % (self.uri, self.root, self.dest,
 
     def _render(self, name, path, dest):
         """ Render a single file. """
-        logger.info("\t> Rendering document: %s --> %s" % (name, dest))
+        logger.info("  > Rendering document: %s --> %s" % (name, dest))
         template = self._env.get_template(path)
         #md_html = render_markdown(content)
         html = template.render(**self.template_globals)
