@@ -8,6 +8,7 @@ import sys
 
 from docfu import log
 from docfu import Docfu
+from docfu import docfu_figlet
 
 
 def parse_args(argv):
@@ -16,18 +17,7 @@ def parse_args(argv):
     argp = argparse.ArgumentParser(
         prog="docfu",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=
-        """
-#############################
-      _             __
-     | |           / _|
-   __| | ___   ___| |_ _   _
-  / _` |/ _ \ / __|  _| | | |
- | (_| | (_) | (__| | | |_| |
-  \__,_|\___/ \___|_|  \__,_|
-
-#############################
-        """)
+        description=docfu_figlet)
 
     argp.add_argument('-c', '--config',
         help='An [optional] configuration file to read.')
@@ -105,7 +95,8 @@ def main(argv=None):
     del options['destination']
     del options['root_dir']
 
-    log.init(options.get('verbosity', logging.DEBUG))
+    logger = log.init(options.get('verbosity', logging.DEBUG))
+
     with Docfu(uri, root, dest, **options) as df:
         df()
 

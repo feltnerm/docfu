@@ -61,6 +61,7 @@ class TextFormatter(Formatter):
 
 
 def init(level=None, logger=getLogger(), handler=StreamHandler()):
+    logging.basicConfig(level=level, datefmt='%m-%d %H:%M')
     logger = logging.getLogger()
 
     if (os.isatty(sys.stdout.fileno())
@@ -73,6 +74,8 @@ def init(level=None, logger=getLogger(), handler=StreamHandler()):
 
     if level:
         logger.setLevel(level)
+
+    return logger
 
 # test
 if __name__ == '__main__':

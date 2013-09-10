@@ -7,6 +7,7 @@ import shutil
 
 import jinja2
 import markdown
+from time import gmtime, strftime
 
 from ext import render_markdown, MarkdownJinja
 from util import (
@@ -21,6 +22,18 @@ __major__ = 0
 __minor__ = 1
 __micro__ = 0
 __version__ = "{0}.{1}.{2}".format(__major__, __minor__, __micro__)
+docfu_figlet = """
+#############################
+      _             __
+     | |           / _|
+   __| | ___   ___| |_ _   _
+  / _` |/ _ \ / __|  _| | | |
+ | (_| | (_) | (__| | | |_| |
+  \__,_|\___/ \___|_|  \__,_|
+
+#############################
+"""
+
 
 logger = logging.getLogger(__name__)
 
@@ -103,6 +116,15 @@ class Docfu(object):
 
         self.template_globals = self._init_template_globals()
 
+        self.log_file = os.path.join(self.dest, 'log.txt')
+        if kwargs.get('log_file'):
+            self.log_file = kwargs['log_file']
+        logger.addHandler(logging.FileHandler(
+            filename=self.log_file,
+            mode='w'))
+
+        logger.info("%s" % docfu_figlet)
+        logger.info("%s" % strftime("%Y-%m-%d %H:%M:%S", gmtime()))
         logger.debug("""> Docfu
 uri: %s
 root: %s
