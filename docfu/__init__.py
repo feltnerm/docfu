@@ -135,7 +135,8 @@ value: %s """ % (self.uri, self.root, self.dest,
 
     def __exit__(self, type, value, traceback):
         logger.info("Cleaning up ...")
-        tmp_close(self.repository_dir)
+        if self.git_repo:
+            tmp_close(self.repository_dir)
 
     def __call__(self):
         self.render()
