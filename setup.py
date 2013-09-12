@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import docfu
 
 try:
     from setuptools import setup
@@ -9,7 +10,7 @@ except ImportError:
 settings = {}
 settings.update(
     name='docfu',
-    version='0.1.0',
+    version=docfu.__version__,
     author='Mark Feltner',
     author_email='feltner.mj@gmail.com',
     license='MIT',
