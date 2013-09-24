@@ -33,7 +33,7 @@ def uri_parse(u):
         if u.count('/') == 1 and len(u.split('/')) == 2:
             # github url
             u = u.strip()
-            u = "http://github.com/" + u
+            u = "git://github.com/" + u
             url = urlparse.urlparse(u)
         else:
             u = "file://" + os.path.expanduser(u)
