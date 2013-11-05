@@ -58,6 +58,9 @@ def parse_args(argv):
 
     argp.add_argument('-l', '--log-file', help='File to log to.')
 
+    argp.add_argument('-V', '--version', action='store_const', const=True,
+        default=False, dest='version', help="Output verison")
+
     argp.add_argument('-v', '--verbose',
         action='store_const',
         const=logging.INFO,
@@ -100,6 +103,11 @@ def main(argv=None):
     del options['uri']
     del options['destination']
     del options['root_dir']
+
+    if options.get('version', False):
+        from docfu import __version__
+        print("v" + __version__)
+        return 0
 
     logger = log.init(level=options.get('verbosity', logging.DEBUG),
         development=options.get('dev', True))
