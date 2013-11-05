@@ -110,7 +110,7 @@ def main(argv=None):
         return 0
 
     logger = log.init(level=options.get('verbosity', logging.DEBUG),
-        development=options.get('dev', True))
+        development=options.get('dev', False))
 
     with Docfu(uri, root, dest, **options) as df:
         df()

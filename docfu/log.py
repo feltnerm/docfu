@@ -36,16 +36,16 @@ class EmailFormatter(Formatter):
 
     def format(self, record):
         return '''
-        Message type:       %(levelname)s
-        Location:           %(pathname)s:%(lineno)d
-        Module:             %(module)s
-        Function:           %(funcName)s
-        Time:               %(asctime)s
+        Message type:       %s
+        Location:           %s:%d
+        Module:             %s
+        Function:           %s
 
         Message
 
-        %(message)s
-        ''' % record.getMessage()
+        %s
+        ''' % (record.levelname, record.pathname, record.lineno, record.module,
+               record.funcName, record.message)
 
 
 class ANSIFormatter(Formatter):
