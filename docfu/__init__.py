@@ -219,11 +219,13 @@ value: %s """ % (self.uri, self.root, self.dest,
         """ Return a jinja2 Environment. """
         defaults = {
             'extensions': [MarkdownJinja],
-            'loader': jinja2.FileSystemLoader(self.source_src_dir),
+            'loader': jinja2.FileSystemLoader([self.templates_src_dir, self.source_src_dir]),
         }
 
         defaults.update(options)
-        return jinja2.Environment(**defaults)
+        env = jinja2.Environment(**defaults)
+        logger.info(env.list_templates())
+        return env
 
     def render(self):
         """ Render the docs found in the repository's source-dir into the
