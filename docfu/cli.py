@@ -76,6 +76,12 @@ def parse_args(argv):
         dest='verbosity',
         help='Run quietly or not.')
 
+    argp.add_argument('--dev',
+         action='store_const',
+         const=True,
+         default=False,
+         help='Run in production mode or not (send emails on error)')
+
     options = argp.parse_args(argv)
 
     return vars(options)
@@ -95,7 +101,8 @@ def main(argv=None):
     del options['destination']
     del options['root_dir']
 
-    logger = log.init(options.get('verbosity', logging.DEBUG))
+    logger = log.init(level=options.get('verbosity', logging.DEBUG),
+        development=options.get('dev', True))
 
     with Docfu(uri, root, dest, **options) as df:
         df()

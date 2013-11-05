@@ -19,7 +19,7 @@ from util import (
 )
 
 __major__ = 0
-__minor__ = 2
+__minor__ = 3
 __micro__ = 0
 __version__ = "{0}.{1}.{2}".format(__major__, __minor__, __micro__)
 docfu_figlet = """
@@ -242,7 +242,19 @@ value: %s """ % (self.uri, self.root, self.dest,
                 source_dest = os.path.join(self.source_dest_dir,
                     source_path.replace(self.source_src_dir, ""))
                 source_name = os.path.basename(source_dest)
-                self._render(source_name, source_path_relative, source_dest)
+                try:
+                    self._render(source_name, source_path_relative, source_dest)
+                except jinja2.exceptions.TemplateSyntaxError, e:
+                    msg = '''
+                    Syntax error:   %s
+                    Message:        %s
+                    Lineno:         %s
+                    Name:           %s''' % (e.filename, e.message, e.lineno, e.name)
+                    logging.error("Syntax error: %s" % source_name)
+                    logging.error(msg)
+                except jinja2.exceptions.TemplateError, e:
+                    logging.error("Could not render: %s" % source_name)
+                    logging.error(e.message)
 
         logger.info("Documents rendered @ %s" % self.dest)
 
