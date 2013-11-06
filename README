@@ -3,16 +3,15 @@ docfu
 =====
 
     | Shaolin shadowboxing, and the docfu sword style
-    | If what you say is true, the Shaolin and the docfu could be dangerous.*
-    | Do you think your docfu sword can defeat me?*
-    | En garde, I'll let you try my docfu style.*
+    | If what you say is true, the Shaolin and the docfu could be dangerous.
+    | Do you think your docfu sword can defeat me?
+    | En garde, I'll let you try my docfu style.
 
+With docfu you can keep writing your project's documentation in same ol' [Markdown](http://daringfireball.net/projects/markdown/) 
+(via [python-markdown](https://pypi.python.org/pypi/Markdown)), but you can (optionally) add templating logic 
+(via [Jinja2](http://jinja.pocoo.org/)).
 
-    | docfu is the messiah, it'll set your docks on fire. Compilation styles vary, and carry like Mariah.
-
-With docfu you can keep writing your docs in same ol' [Markdown](http://daringfireball.net/projects/markdown/) (via [python-markdown](https://pypi.python.org/pypi/Markdown)), but you can (optionally) add templating logic (via [Jinja2](http://jinja.pocoo.org/)). 
-
-docfu will automatically compile a directory, tag/branch of a git repository, and parse GitHub urls. 
+docfu works when given a directory, git repository (optionally a tag or branch), and shortened GitHub urls (feltnerm/docfu). 
 This makes it a great tool for a git post-commit hook or as just a regular ol' documentation generator.
 
 docfu is at most alpha status right now. Please post ideas and bugs to the `issue tracker`_.
@@ -43,32 +42,39 @@ Usage:
 
 ::
 
-    usage: docfu [-h] [-b BRANCH] [-t TAG] [-r ROOT_DIR] [--source-dir SOURCE_DIR]
-                 [--templates-dir TEMPLATES_DIR] [--assets-dir ASSETS_DIR]
-                 [-c CONFIG] [-v]
+    usage: docfu [-h] [-c CONFIG] [-b BRANCH] [-t TAG] [-r ROOT_DIR]
+                 [--assets-dir ASSETS_DIR] [--source-dir SOURCE_DIR]
+                 [--temp-dir TEMP_DIR] [--templates-dir TEMPLATES_DIR]
+                 [-l LOG_FILE] [-V] [-v] [-d] [-q] [--dev]
                  uri destination
-
+    
     positional arguments:
-      uri                   A URI pointing to a file path, git repository, or
-                            github shortened repo.
+      uri                   A URI to a file path, git repository, or github repo.
       destination           Destination for compiled source.
-
+    
     optional arguments:
       -h, --help            show this help message and exit
+      -c CONFIG, --config CONFIG
+                            An [optional] configuration file to read.
       -b BRANCH, --branch BRANCH
                             A git branch to checkout.
       -t TAG, --tag TAG     A git tag to checkout.
       -r ROOT_DIR, --root-dir ROOT_DIR
                             Root directory which docs are built from.
-      --source-dir SOURCE_DIR
-                            Source directory which to compile from.
-      --templates-dir TEMPLATES_DIR
-                            Directory to look for Jinaj2 templates in.
       --assets-dir ASSETS_DIR
                             Directory to look for assets (css, js & images) in.
-      -c CONFIG, --config CONFIG
-                            A configuration file to read (not implemented)
+      --source-dir SOURCE_DIR
+                            Source directory which to compile from.
+      --temp-dir TEMP_DIR   Temporary directory to build docs
+      --templates-dir TEMPLATES_DIR
+                            Directory to look for Jinja2 templates in.
+      -l LOG_FILE, --log-file LOG_FILE
+                            File to log to.
+      -V, --version         Output verison
       -v, --verbose         Run verbosely or not.
+      -d, --debug           Run debugly or not.
+      -q, --quiet           Run quietly or not.
+      --dev                 Run in production mode or not (send emails on error)
                             
 Examples:
 ---------
