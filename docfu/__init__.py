@@ -112,6 +112,7 @@ class Docfu(object):
         self.dest = os.path.join(dest, self.git_ref_type, self.git_ref_val)
         self.source_dest_dir = os.path.join(self.dest)
         self.assets_dest_dir = os.path.join(self.dest, '_static')
+        self.build_directory = tmp_mk()
         self._init_directories()
 
         self.template_globals = self._init_template_globals()
@@ -142,11 +143,14 @@ static: %s
 
 >> Git ref
 type: %s
-value: %s """ % (self.uri, self.root, self.dest,
-    self.source_src_dir, self.assets_src_dir, self.templates_src_dir,
-    self.source_dest_dir, self.assets_dest_dir,
-    self.template_globals['GIT_REF_TYPE'],
-    self.template_globals['GIT_REF']))
+value: %s
+
+>> Build
+dest: %s """ % (self.uri, self.root, self.dest,
+        self.source_src_dir, self.assets_src_dir, self.templates_src_dir,
+        self.source_dest_dir, self.assets_dest_dir,
+        self.template_globals['GIT_REF_TYPE'],
+        self.template_globals['GIT_REF'], self.build_directory))
 
         logger.debug(self.template_globals)
 
@@ -181,8 +185,8 @@ value: %s """ % (self.uri, self.root, self.dest,
             os.makedirs(self.source_dest_dir)
 
         logger.debug("`shutil.copytree.(%s, %s)`" %
-                (self.assets_src_dir, self.assets_dest_dir))
-        shutil.copytree(self.assets_src_dir, self.assets_dest_dir)
+                (self.assets_src_dir, os.path.join(self.build_directory, os.path.split(self.assets_src_dir)[1])))
+        shutil.copytree(self.assets_src_dir, os.path.join(self.build_directory, os.path.split(self.assets_src_dir)[1]))
 
     def _init_template_globals(self):
         """ Return a dictionary of template globals to use in the
@@ -239,7 +243,7 @@ value: %s """ % (self.uri, self.root, self.dest,
                 #with open(source_path, 'r') as source_file:
                     #source_data = source_file.read().decode('utf-8',
                     #    'replace')
-                source_dest = os.path.join(self.source_dest_dir,
+                source_dest = os.path.join(self.build_directory,
                     source_path.replace(self.source_src_dir, ""))
                 source_name = os.path.basename(source_dest)
                 try:
@@ -256,6 +260,8 @@ value: %s """ % (self.uri, self.root, self.dest,
                     logging.error("Could not render: %s" % source_name)
                     logging.error(e.message)
 
+        shutil.rmtree(self.dest)
+        shutil.copytree(self.build_directory, self.dest)
         logger.info("Documents rendered @ %s" % self.dest)
 
     def _render(self, name, path, dest):
