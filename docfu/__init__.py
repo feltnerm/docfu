@@ -173,12 +173,13 @@ dest: %s """ % (self.uri, self.root, self.dest,
         First, wipe any pre-existing documentation for the same
         release. Then, create directories, and copy over assets.
         """
-        if os.path.exists(self.dest):
-            logger.debug("`shutil.rmtree(%s)`" % self.dest)
-            shutil.rmtree(self.dest)
+        #if os.path.exists(self.dest):
+        #    logger.debug("`shutil.rmtree(%s)`" % self.dest)
+        #    shutil.rmtree(self.dest)
 
-        logger.debug("`os.makedirs(%s)`" % self.dest)
-        os.makedirs(self.dest)
+        if not os.path.exists(self.dest):
+            logger.debug("`os.makedirs(%s)`" % self.dest)
+            os.makedirs(self.dest)
 
         if not os.path.exists(self.source_dest_dir):
             logger.debug("`os.makedirs(%s)`" % self.source_dest_dir)
