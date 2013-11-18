@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import with_statement
 
+import glob
 import logging
 import os.path
 import shutil
@@ -263,6 +264,8 @@ dest: %s """ % (self.uri, self.root, self.dest,
 
         shutil.rmtree(self.dest)
         shutil.copytree(self.build_directory, self.dest)
+        for x in glob.iglob(os.path.join(self.dest, '**/*')):
+            os.chmod(x, 0775)
         logger.info("Documents rendered @ %s" % self.dest)
 
     def _render(self, name, path, dest):
