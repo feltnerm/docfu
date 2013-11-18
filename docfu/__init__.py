@@ -21,7 +21,7 @@ from util import (
 
 __major__ = 0
 __minor__ = 3
-__micro__ = 2
+__micro__ = 3
 __version__ = "{0}.{1}.{2}".format(__major__, __minor__, __micro__)
 docfu_figlet = """
 #############################
