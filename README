@@ -7,11 +7,11 @@ docfu
     | Do you think your docfu sword can defeat me?
     | En garde, I'll let you try my docfu style.
 
-With docfu you can keep writing your project's documentation in same ol' [Markdown](http://daringfireball.net/projects/markdown/) 
-(via [python-markdown](https://pypi.python.org/pypi/Markdown)), but you can (optionally) add templating logic 
+With docfu you can keep writing your project's documentation in same ol' [Markdown](http://daringfireball.net/projects/markdown/)
+(via [python-markdown](https://pypi.python.org/pypi/Markdown)), but you can (optionally) add templating logic
 (via [Jinja2](http://jinja.pocoo.org/)).
 
-docfu works when given a directory, git repository (optionally a tag or branch), and shortened GitHub urls (feltnerm/docfu). 
+docfu works when given a directory, git repository (optionally a tag or branch), and shortened GitHub urls (feltnerm/docfu).
 This makes it a great tool for a git post-commit hook or as just a regular ol' documentation generator.
 
 docfu is at most alpha status right now. Please post ideas and bugs to the `issue tracker`_.
@@ -31,8 +31,19 @@ Installation:
     $ cd docfu
     $ python setup.py install
 
+Development:
+------------
 
-Usage: 
+::
+
+    $ git clone https://github.com/feltnerm/docfu
+    $ virtualenv docfu-env
+    $ source docfu-env/bin/activate
+    $ cd docfu
+    $ python setup.py install
+
+
+Usage:
 ------
 
    | The game of chess is like a swordfight
@@ -47,11 +58,11 @@ Usage:
                  [--temp-dir TEMP_DIR] [--templates-dir TEMPLATES_DIR]
                  [-l LOG_FILE] [-V] [-v] [-d] [-q] [--dev]
                  uri destination
-    
+
     positional arguments:
       uri                   A URI to a file path, git repository, or github repo.
       destination           Destination for compiled source.
-    
+
     optional arguments:
       -h, --help            show this help message and exit
       -c CONFIG, --config CONFIG
@@ -75,7 +86,7 @@ Usage:
       -d, --debug           Run debugly or not.
       -q, --quiet           Run quietly or not.
       --dev                 Run in production mode or not (send emails on error)
-                            
+
 Examples:
 ---------
 
