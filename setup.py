@@ -23,7 +23,6 @@ settings.update(
         'Markdown',
         'Pygments',
         'argparse',
-        'mdx_smartypants',
         'GitPython'
     ],
     classifiers=(

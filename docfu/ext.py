@@ -5,7 +5,7 @@ import markdown as md
 
 markd = md.Markdown(extensions=[
     'attr_list', 'fenced_code', 'smart_strong', 'tables', 'codehilite',
-    'headerid', 'sane_lists', 'wikilinks', 'smartypants'],
+    'headerid', 'sane_lists', 'wikilinks'],
     output_format='html5')
 
 render_markdown = lambda text: markd.convert(text)
